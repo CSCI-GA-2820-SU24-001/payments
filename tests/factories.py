@@ -4,7 +4,9 @@ Test Factory to make fake objects for testing
 
 import factory
 import factory.random
-from service.models import Promotion
+import uuid
+import datetime
+from service.models import Promotion, PromotionType, PromotionScope
 
 
 class PromotionFactory(factory.Factory):
@@ -15,9 +17,18 @@ class PromotionFactory(factory.Factory):
 
         model = Promotion
 
-    promotion_id = factory.Sequence(lambda n: n)
-    promotion_name = factory.Faker("some_promotion")
-    promotion_description = factory.Faker("some_description")
-    promotion_type = factory.Faker("123")
+    promotion_name = "some_promotion"
+    promotion_description = "a good promotion"
+    promotion_type = PromotionType.ABSOLUTE
+    promotion_scope = PromotionScope.PRODUCT_ID
+    start_date = "2025-01-01"
+    end_date = "2026-01-01"
+    promotion_value = 50
+    promotion_code = None
+    created_by = uuid.uuid4()
+    modified_by = uuid.uuid4()
+    created_when = "2024-01-01"
+    modified_when = None
+
 
     # Todo: Add your other attributes here...
