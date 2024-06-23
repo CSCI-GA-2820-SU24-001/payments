@@ -5,6 +5,7 @@ All of the models are stored in this module
 """
 
 import logging
+import enum
 from flask_sqlalchemy import SQLAlchemy
 
 logger = logging.getLogger("flask.app")
@@ -17,7 +18,22 @@ class DataValidationError(Exception):
     """Used for an data validation errors when deserializing"""
 
 
-class YourResourceModel(db.Model):
+class PromotionType(enum.Enum):
+    """Used to represent different types of promotions"""
+
+    PERCENTAGE = 1
+    ABSOLUTE = 2
+
+
+class PromotionScope(enum.Enum):
+    """Used to represent the scope a promotion is applicable to"""
+
+    PRODUCT_ID = 1
+    PRODUCT_CATEGORY = 2
+    ENTIRE_STORE = 3
+   
+
+class Promotion(db.Model):
     """
     Class that represents a YourResourceModel
     """
@@ -25,10 +41,19 @@ class YourResourceModel(db.Model):
     ##################################################
     # Table Schema
     ##################################################
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(63))
-
-    # Todo: Place the rest of your schema here...
+    promotion_id = db.Column(db.Integer, primary_key=True)
+    promotion_name = db.Column(db.String(63))
+    promotion_description = db.Column(db.String(255))
+    promotion_type = db.Column(db.Enum(PromotionType))
+    promotion_scope = db.Column(db.Enum(PromotionScope))
+    start_date = db.Column(db.DateTime)
+    end_date = db.Column(db.DateTime)
+    promotion_value = db.Column(db.Double)
+    promotion_code = db.Column(db.String(63), nullable=True)
+    created_by = db.Column(db.Uuid)
+    modified_by = db.Column(db.Uuid, nullable=True)
+    created_when = db.Column(db.DateTime)
+    modified_when = db.Column(db.DateTime)
 
     def __repr__(self):
         return f"<YourResourceModel {self.name} id=[{self.id}]>"
