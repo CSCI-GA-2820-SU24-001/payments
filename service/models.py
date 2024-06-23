@@ -31,7 +31,7 @@ class PromotionScope(enum.Enum):
     PRODUCT_ID = 1
     PRODUCT_CATEGORY = 2
     ENTIRE_STORE = 3
-   
+
 
 class Promotion(db.Model):
     """

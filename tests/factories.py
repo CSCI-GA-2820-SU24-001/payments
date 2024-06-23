@@ -1,11 +1,10 @@
 """
 Test Factory to make fake objects for testing
 """
+import uuid
 
 import factory
 import factory.random
-import uuid
-import datetime
 from service.models import Promotion, PromotionType, PromotionScope
 
 
@@ -29,6 +28,3 @@ class PromotionFactory(factory.Factory):
     modified_by = uuid.uuid4()
     created_when = "2024-01-01"
     modified_when = None
-
-
-    # Todo: Add your other attributes here...
