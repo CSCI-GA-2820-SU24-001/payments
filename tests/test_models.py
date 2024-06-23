@@ -4,6 +4,7 @@ Test cases for Pet Model
 
 import os
 import logging
+from datetime import datetime
 from unittest import TestCase
 import uuid
 
@@ -51,6 +52,38 @@ class TestPromotions(TestCase):
     #  T E S T   C A S E S
     ######################################################################
 
+    # Todo: Add your test cases here...
+    def test_create_promotion(self):
+        promotion_id = 123
+        promotion_name = "some_promotion"
+        promotion_description = "a good promotion"
+        promotion_type = PromotionType.ABSOLUTE
+        promotion_scope = PromotionScope.PRODUCT_ID
+        start_date = "2025-01-01"
+        end_date = "2026-01-01"
+        promotion_value = 50
+        promotion_code = None
+        created_by = uuid.uuid4()
+        modified_by = uuid.uuid4()
+        created_when = "2024-01-01"
+        modified_when = None
+
+        test_promotion = Promotion(promotion_id=promotion_id, promotion_name=promotion_name, 
+                                   promotion_description=promotion_description, promotion_type=promotion_type,
+                                   promotion_scope=promotion_scope, start_date=start_date, end_date=end_date,
+                                   promotion_value=promotion_value, promotion_code=promotion_code,
+                                   created_by=created_by, modified_by=modified_by,
+                                   created_when=created_when, modified_when=modified_when)
+        
+        test_promotion.create()
+        assert test_promotion.promotion_name == "some_promotion"
+        assert test_promotion.created_by == created_by
+        found = Promotion.all()
+        self.assertEqual(len(found), 1)
+        data = Promotion.find(test_promotion.promotion_id)
+        self.assertEqual(data.promotion_name, test_promotion.promotion_name)
+        self.assertEqual(data.start_date, datetime(2025, 1, 1, 0, 0))
+
     def test_create_promotions_instance(self):
         """It should create a YourResourceModel"""
         # Todo: Remove this test case example
@@ -61,31 +94,5 @@ class TestPromotions(TestCase):
         self.assertEqual(len(found), 1)
         data = Promotion.find(resource.promotion_id)
         self.assertEqual(data.promotion_name, resource.promotion_name)
-
-    # Todo: Add your test cases here...
-    def test_init_promotion(self):
-        promotion_id = 123
-        promotion_name = "some_promotion"
-        promotion_description = "a good promotion"
-        promotion_type = PromotionType.ABSOLUTE
-        promotion_scope = PromotionScope.PRODUCT_ID
-        start_date = DateTime()
-        end_date = DateTime()
-        promotion_value = 50
-        promotion_code = None
-        created_by = uuid.uuid4()
-        modified_by = uuid.uuid4()
-        created_when = DateTime()
-        modified_when = None
-
-        test_promotion = Promotion(promotion_id=promotion_id, promotion_name=promotion_name, 
-                                   promotion_description=promotion_description, promotion_type=promotion_type,
-                                   promotion_scope=promotion_scope, start_date=start_date, end_date=end_date,
-                                   promotion_value=promotion_value, promotion_code=promotion_code,
-                                   created_by=created_by, modified_by=modified_by,
-                                   created_when=created_when, modified_when=modified_when)
-        
-        assert test_promotion.promotion_id == 123
-        assert test_promotion.created_by == created_by  
 
         
