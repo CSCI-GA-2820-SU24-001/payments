@@ -56,14 +56,14 @@ class Promotion(db.Model):
     modified_when = db.Column(db.DateTime)
 
     def __repr__(self):
-        return f"<YourResourceModel {self.name} id=[{self.id}]>"
+        return f"<Promotion {self.promotion_name} promotion_id=[{self.promotion_id}], promotion_name=[{self.promotion_name}]>"
 
     def create(self):
         """
         Creates a YourResourceModel to the database
         """
-        logger.info("Creating %s", self.name)
-        self.id = None  # pylint: disable=invalid-name
+        logger.info("Creating %s", self.promotion_name)
+        self.promotion_id = None  # pylint: disable=invalid-name
         try:
             db.session.add(self)
             db.session.commit()
@@ -76,7 +76,7 @@ class Promotion(db.Model):
         """
         Updates a YourResourceModel to the database
         """
-        logger.info("Saving %s", self.name)
+        logger.info("Saving %s", self.promotion_name)
         try:
             db.session.commit()
         except Exception as e:
@@ -86,7 +86,7 @@ class Promotion(db.Model):
 
     def delete(self):
         """Removes a YourResourceModel from the data store"""
-        logger.info("Deleting %s", self.name)
+        logger.info("Deleting %s", self.promotion_name)
         try:
             db.session.delete(self)
             db.session.commit()
@@ -97,7 +97,7 @@ class Promotion(db.Model):
 
     def serialize(self):
         """Serializes a YourResourceModel into a dictionary"""
-        return {"id": self.id, "name": self.name}
+        return {"id": self.promotion_id, "name": self.promotion_name}
 
     def deserialize(self, data):
         """
@@ -107,7 +107,7 @@ class Promotion(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.name = data["name"]
+            self.promotion_name = data["name"]
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
