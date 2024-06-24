@@ -14,6 +14,20 @@ permissions:
 jobs:
   lint:
     runs-on: ubuntu-latest
+
+    services:
+      postgres-sql:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
@@ -39,8 +53,6 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.11"
-    - name: Set up Dev Container
-      uses: devcontainers/ci@v0.3
     - name: Install dependencies
       run: |
         pip install poetry
@@ -49,3 +61,5 @@ jobs:
     - name: Test with pytest
       run: |
         pytest --pspec --cov=service --cov-fail-under=95
+      env:
+        DATABASE_URI: "postgres://postgres:5432"
