@@ -22,6 +22,7 @@ jobs:
         python-version: "3.11"
     - name: Install dependencies
       run: |
+        pip install poetry
         poetry config virtualenvs.create false
         poetry install
     - name: Run Linter
@@ -35,7 +36,9 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: pgs3cr3t
+          POSTGRES_DB: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
