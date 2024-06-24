@@ -34,8 +34,6 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.11"
-    - name: Set up Dev Container
-      uses: devcontainers/ci@v0.3
     - name: Install dependencies
       run: |
         poetry config virtualenvs.create false
@@ -62,4 +60,4 @@ jobs:
       run: |
         pytest --pspec --cov=service --cov-fail-under=95
       env:
-        DATABASE_URI: "postgres://postgres:5432"
+        DATABASE_URI: "postgresql+psycopg://postgres:5432"
