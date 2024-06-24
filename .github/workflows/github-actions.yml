@@ -39,6 +39,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: pgs3cr3t
           POSTGRES_DB: test
+          POSTGRES_HOST_AUTH_METHOD: trust
         options: >-
           --health-cmd "pg_isready -U postgres -d postgres"
           --health-interval 10s
