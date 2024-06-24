@@ -10,7 +10,7 @@ from service.models import YourResourceModel, DataValidationError, db
 from .factories import YourResourceModelFactory
 
 DATABASE_URI = os.getenv(
-    "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
+    "DATABASE_URI", "postgresql+psycopg://postgres:pgs3cr3t@postgres:5432/test"
 )
 
 print("Starting with Database uri: ", DATABASE_URI)
