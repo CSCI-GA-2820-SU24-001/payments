@@ -36,7 +36,6 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: pgs3cr3t
           POSTGRES_DB: test
         options: >-
