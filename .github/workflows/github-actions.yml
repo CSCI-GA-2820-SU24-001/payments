@@ -23,9 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install poetry
-    - name: Poetry install
-      run: |
-        poetry install
+        make install
     - name: Lint with pylint
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -40,10 +38,8 @@ jobs:
         python-version: "3.11"
     - name: Install dependencies
       run: |
-        pip install flake8 pytest poetry pytest-cov
-    - name: Poetry install
-      run: |
-        poetry install
+        pip install poetry
+        make install        
     - name: Test with pytest
       run: |
         make test
