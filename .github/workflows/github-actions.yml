@@ -23,6 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install poetry
+        poetry config virtualenvs.create false
         poetry install
     - name: Run Linter
       run: |
@@ -40,7 +41,8 @@ jobs:
     - name: Install dependencies
       run: |
         pip install poetry
-        poetry install        
+        poetry config virtualenvs.create false
+        poetry install
     - name: Test with pytest
       run: |
         pytest --pspec --cov=service --cov-fail-under=95
