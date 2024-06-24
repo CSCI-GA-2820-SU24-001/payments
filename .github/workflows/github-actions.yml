@@ -41,6 +41,8 @@ jobs:
     - name: Install dependencies
       run: |
         pip install flake8 pytest poetry pytest-cov
+    - name: Poetry install
+      run: |
         poetry install
     - name: Test with pytest
       run: |
