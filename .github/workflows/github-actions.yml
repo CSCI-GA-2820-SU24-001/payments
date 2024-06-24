@@ -22,7 +22,7 @@ jobs:
         python-version: "3.11"
     - name: Install dependencies
       run: |
-        pip install flake8 pytest poetry
+        pip install flake8 pytest poetry pytest-cov
         poetry install
     - name: Lint with pylint
       run: |
@@ -38,7 +38,7 @@ jobs:
         python-version: "3.11"
     - name: Install dependencies
       run: |
-        pip install flake8 pytest poetry
+        pip install flake8 pytest poetry pytest-cov
         poetry install
     - name: Test with pytest
       run: |
