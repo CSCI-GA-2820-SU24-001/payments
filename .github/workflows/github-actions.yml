@@ -32,18 +32,20 @@ jobs:
         pylint service tests --max-line-length=127
   test:
     runs-on: ubuntu-latest
+    env:
+        DATABASE_URI: "postgresql+psycopg://postgres:pgs3cr3t@postgres:5432/test"
     services:
       postgres:
         image: postgres:15-alpine
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: pgs3cr3t
-          POSTGRES_DB: postgres
-        # options: >-
-          # --health-cmd "pg_isready -U postgres -d postgres"
-          # --health-interval 10s
-          # --health-timeout 5s
-          # --health-retries 5
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
           - 5432:5432
     steps:
@@ -59,8 +61,6 @@ jobs:
         poetry lock --no-update
         poetry install
     - name: Test with pytest
-      env:
-        DATABASE_URI: "postgresql+psycopg://postgres:pgs3cr3t@postgres:5432/postgres"
       run: |
         pytest --pspec --cov=service --cov-fail-under=70
       
