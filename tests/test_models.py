@@ -6,7 +6,7 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import YourResourceModel, DataValidationError, db
+from service.models import YourResourceModel, db
 from .factories import YourResourceModelFactory
 
 DATABASE_URI = os.getenv(
@@ -16,6 +16,8 @@ DATABASE_URI = os.getenv(
 ######################################################################
 #  YourResourceModel   M O D E L   T E S T   C A S E S
 ######################################################################
+
+
 # pylint: disable=too-many-public-methods
 class TestYourResourceModel(TestCase):
     """Test Cases for YourResourceModel Model"""
