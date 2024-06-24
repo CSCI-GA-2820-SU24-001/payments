@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -28,6 +28,18 @@ jobs:
       run: |
         # stop the build if there are Python syntax errors or undefined names
         make lint
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+    - name: Install dependencies
+      run: |
+        pip install flake8 pytest poetry
+        poetry install
     - name: Test with pytest
       run: |
         make test
