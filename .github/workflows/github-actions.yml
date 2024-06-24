@@ -1,18 +1,15 @@
-name: CI Build
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python application
+
 on:
   push:
-    branches:
-      - master
-    paths-ignore:
-      - "README.md"
-      - ".vscode/**"
-
+    branches: [$default_branch]
   pull_request:
-    branches:
-      - master
-    paths-ignore:
-      - "README.md"
-      - ".vscode/**"
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -41,9 +38,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.11'
+
       - name: Install dependencies
         run: |
-          python -m pip install -U pip poetry
+          pip install poetry
           poetry config virtualenvs.create false
           poetry install
       - name: Linting
