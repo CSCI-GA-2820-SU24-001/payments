@@ -4,10 +4,11 @@ Test cases for Pet Model
 
 import os
 import logging
+from datetime import datetime
 from unittest import TestCase
 from wsgi import app
-from service.models import YourResourceModel, db
-from .factories import YourResourceModelFactory
+from service.models import Promotion, DataValidationError, db
+from .factories import PromotionFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -19,7 +20,7 @@ DATABASE_URI = os.getenv(
 
 
 # pylint: disable=too-many-public-methods
-class TestYourResourceModel(TestCase):
+class TestPromotions(TestCase):
     """Test Cases for YourResourceModel Model"""
 
     @classmethod
@@ -38,7 +39,7 @@ class TestYourResourceModel(TestCase):
 
     def setUp(self):
         """This runs before each test"""
-        db.session.query(YourResourceModel).delete()  # clean up the last tests
+        db.session.query(Promotion).delete()  # clean up the last tests
         db.session.commit()
 
     def tearDown(self):
@@ -49,15 +50,22 @@ class TestYourResourceModel(TestCase):
     #  T E S T   C A S E S
     ######################################################################
 
-    def test_example_replace_this(self):
-        """It should create a YourResourceModel"""
-        # Todo: Remove this test case example
-        resource = YourResourceModelFactory()
-        resource.create()
-        self.assertIsNotNone(resource.id)
-        found = YourResourceModel.all()
-        self.assertEqual(len(found), 1)
-        data = YourResourceModel.find(resource.id)
-        self.assertEqual(data.name, resource.name)
-
     # Todo: Add your test cases here...
+    def test_create_promotion(self):
+        """It should create a Promotion"""
+        test_promotion = PromotionFactory()
+
+        test_promotion.create()
+        assert test_promotion.promotion_name == "some_promotion"
+        assert test_promotion.created_by == test_promotion.created_by
+        found = Promotion.all()
+        self.assertEqual(len(found), 1)
+        data = Promotion.find(test_promotion.promotion_id)
+        self.assertEqual(data.promotion_name, test_promotion.promotion_name)
+        self.assertEqual(data.start_date, datetime(2025, 1, 1, 0, 0))
+
+    def test_create_invalid_promotion(self):
+        """It should throw a DataValidationError"""
+        test_promotion = PromotionFactory()
+        test_promotion.start_date = "abcadw"
+        self.assertRaises(DataValidationError, test_promotion.create)

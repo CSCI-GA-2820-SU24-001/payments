@@ -22,6 +22,7 @@ and Delete Pets from the inventory of pets in the PetShop
 """
 
 from flask import current_app as app  # Import Flask application
+from service.models import Promotion
 from service.common import status  # HTTP Status Codes
 
 
