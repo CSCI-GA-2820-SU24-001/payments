@@ -5,6 +5,7 @@ All of the models are stored in this module
 """
 
 import logging
+import enum
 from flask_sqlalchemy import SQLAlchemy
 
 logger = logging.getLogger("flask.app")
@@ -17,7 +18,22 @@ class DataValidationError(Exception):
     """Used for an data validation errors when deserializing"""
 
 
-class YourResourceModel(db.Model):
+class PromotionType(enum.Enum):
+    """Used to represent different types of promotions"""
+
+    PERCENTAGE = 1
+    ABSOLUTE = 2
+
+
+class PromotionScope(enum.Enum):
+    """Used to represent the scope a promotion is applicable to"""
+
+    PRODUCT_ID = 1
+    PRODUCT_CATEGORY = 2
+    ENTIRE_STORE = 3
+
+
+class Promotion(db.Model):
     """
     Class that represents a YourResourceModel
     """
@@ -25,20 +41,29 @@ class YourResourceModel(db.Model):
     ##################################################
     # Table Schema
     ##################################################
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(63))
-
-    # Todo: Place the rest of your schema here...
+    promotion_id = db.Column(db.Integer, primary_key=True)
+    promotion_name = db.Column(db.String(63))
+    promotion_description = db.Column(db.String(255))
+    promotion_type = db.Column(db.Enum(PromotionType))
+    promotion_scope = db.Column(db.Enum(PromotionScope))
+    start_date = db.Column(db.DateTime)
+    end_date = db.Column(db.DateTime)
+    promotion_value = db.Column(db.Double)
+    promotion_code = db.Column(db.String(63), nullable=True)
+    created_by = db.Column(db.Uuid)
+    modified_by = db.Column(db.Uuid, nullable=True)
+    created_when = db.Column(db.DateTime)
+    modified_when = db.Column(db.DateTime)
 
     def __repr__(self):
-        return f"<YourResourceModel {self.name} id=[{self.id}]>"
+        return f"<Promotion {self.promotion_name} promotion_id=[{self.promotion_id}], promotion_name=[{self.promotion_name}]>"
 
     def create(self):
         """
         Creates a YourResourceModel to the database
         """
-        logger.info("Creating %s", self.name)
-        self.id = None  # pylint: disable=invalid-name
+        logger.info("Creating %s", self.promotion_name)
+        self.promotion_id = None  # pylint: disable=invalid-name
         try:
             db.session.add(self)
             db.session.commit()
@@ -51,7 +76,7 @@ class YourResourceModel(db.Model):
         """
         Updates a YourResourceModel to the database
         """
-        logger.info("Saving %s", self.name)
+        logger.info("Saving %s", self.promotion_name)
         try:
             db.session.commit()
         except Exception as e:
@@ -61,7 +86,7 @@ class YourResourceModel(db.Model):
 
     def delete(self):
         """Removes a YourResourceModel from the data store"""
-        logger.info("Deleting %s", self.name)
+        logger.info("Deleting %s", self.promotion_name)
         try:
             db.session.delete(self)
             db.session.commit()
@@ -72,7 +97,7 @@ class YourResourceModel(db.Model):
 
     def serialize(self):
         """Serializes a YourResourceModel into a dictionary"""
-        return {"id": self.id, "name": self.name}
+        return {"id": self.promotion_id, "name": self.promotion_name}
 
     def deserialize(self, data):
         """
@@ -82,7 +107,7 @@ class YourResourceModel(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.name = data["name"]
+            self.promotion_name = data["name"]
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
