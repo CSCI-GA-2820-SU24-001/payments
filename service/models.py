@@ -7,6 +7,7 @@ All of the models are stored in this module
 import logging
 import enum
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 logger = logging.getLogger("flask.app")
 
@@ -96,29 +97,45 @@ class Promotion(db.Model):
             raise DataValidationError(e) from e
 
     def serialize(self):
-        """Serializes a YourResourceModel into a dictionary"""
-        return {"id": self.promotion_id, "name": self.promotion_name}
+        """Serializes a Promotion into a dictionary"""
+        return {
+            "promotion_id": self.promotion_id,
+            "promotion_name": self.promotion_name,
+            "promotion_description": self.promotion_description,
+            "promotion_type": self.promotion_type.name,
+            "promotion_scope": self.promotion_scope.name,
+            "start_date": self.start_date.isoformat() if self.start_date else None,
+            "end_date": self.end_date.isoformat() if self.end_date else None,
+            "promotion_value": self.promotion_value,
+            "promotion_code": self.promotion_code,
+            "created_by": self.created_by,
+            "modified_by": self.modified_by,
+            "created_when": self.created_when.isoformat() if self.created_when else None,
+            "modified_when": self.modified_when.isoformat() if self.modified_when else None
+        }
 
     def deserialize(self, data):
         """
-        Deserializes a YourResourceModel from a dictionary
+        Deserializes a Promotion from a dictionary
 
         Args:
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.promotion_name = data["name"]
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
-        except KeyError as error:
-            raise DataValidationError(
-                "Invalid YourResourceModel: missing " + error.args[0]
-            ) from error
-        except TypeError as error:
-            raise DataValidationError(
-                "Invalid YourResourceModel: body of request contained bad or no data "
-                + str(error)
-            ) from error
+            self.promotion_name = data["promotion_name"]
+            self.promotion_description = data.get("promotion_description")
+            self.promotion_type = PromotionType[data["promotion_type"]]
+            self.promotion_scope = PromotionScope[data["promotion_scope"]]
+            self.start_date = datetime.fromisoformat(data["start_date"])
+            self.end_date = datetime.fromisoformat(data["end_date"])
+            self.promotion_value = data["promotion_value"]
+            self.promotion_code = data.get("promotion_code")
+            self.created_by = data["created_by"]
+            self.modified_by = data.get("modified_by")
+            self.created_when = datetime.fromisoformat(data["created_when"])
+            self.modified_when = datetime.fromisoformat(data["modified_when"]) if data.get("modified_when") else None
+        except (KeyError, TypeError, ValueError) as error:
+            raise DataValidationError("Invalid promotion: " + str(error)) from error
         return self
 
     ##################################################

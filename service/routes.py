@@ -21,11 +21,11 @@ This service implements a REST API that allows you to Create, Read, Update
 and Delete Pets from the inventory of pets in the PetShop
 """
 
-from flask import jsonify, request, url_for, abort
+from flask import jsonify, request,  url_for, abort, make_response
 from flask import current_app as app  # Import Flask application
-from service.models import Promotion
+from service.models import Promotion, PromotionType, PromotionScope, db
 from service.common import status  # HTTP Status Codes
-
+from datetime import datetime
 
 ######################################################################
 # GET INDEX
