@@ -54,7 +54,7 @@ class PromotionScope(enum.Enum):
             ) from error
 
 
-class Promotion(db.Model):
+class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
     """
     Class that represents a YourResourceModel
     """
@@ -171,11 +171,9 @@ class Promotion(db.Model):
         """
         if key not in data:
             return default
-        else:
-            if deserializer is not None:
-                return deserializer(data[key])
-            else:
-                return data[key]
+        if deserializer is not None:
+            return deserializer(data[key])
+        return data[key]
 
     def deserialize(self, data):
         """
@@ -184,62 +182,63 @@ class Promotion(db.Model):
             data (dict): A dictionary containing the promotion data
         """
         try:
-            new_promotion_id = self.deserialize_with_default(
+            updated_promotion = Promotion()
+            updated_promotion.promotion_id = self.deserialize_with_default(
                 "promotion_id", data, self.promotion_id
             )
-            new_promotion_name = self.deserialize_with_default(
+            updated_promotion.promotion_name = self.deserialize_with_default(
                 "promotion_name", data, self.promotion_name
             )
-            new_promotion_description = self.deserialize_with_default(
+            updated_promotion.promotion_description = self.deserialize_with_default(
                 "promotion_description", data, self.promotion_description
             )
-            new_promotion_type = self.deserialize_with_default(
+            updated_promotion.promotion_type = self.deserialize_with_default(
                 "promotion_type", data, self.promotion_type, PromotionType.deserialize
             )
-            new_promotion_scope = self.deserialize_with_default(
+            updated_promotion.promotion_scope = self.deserialize_with_default(
                 "promotion_scope",
                 data,
                 self.promotion_scope,
                 PromotionScope.deserialize,
             )
-            new_start_date = self.deserialize_with_default(
+            updated_promotion.start_date = self.deserialize_with_default(
                 "start_date", data, self.start_date, self.deserialize_datetime
             )
-            new_end_date = self.deserialize_with_default(
+            updated_promotion.end_date = self.deserialize_with_default(
                 "end_date", data, self.end_date, self.deserialize_datetime
             )
-            new_promotion_value = self.deserialize_with_default(
+            updated_promotion.promotion_value = self.deserialize_with_default(
                 "promotion_value", data, self.promotion_value
             )
-            new_promotion_code = self.deserialize_with_default(
+            updated_promotion.promotion_code = self.deserialize_with_default(
                 "promotion_code", data, self.promotion_code
             )
-            new_created_by = self.deserialize_with_default(
+            updated_promotion.created_by = self.deserialize_with_default(
                 "created_by", data, self.created_by
             )
-            new_modified_by = self.deserialize_with_default(
+            updated_promotion.modified_by = self.deserialize_with_default(
                 "modified_by", data, self.modified_by
             )
-            new_created_when = self.deserialize_with_default(
+            updated_promotion.created_when = self.deserialize_with_default(
                 "created_when", data, self.created_when, self.deserialize_datetime
             )
-            new_modified_when = self.deserialize_with_default(
+            updated_promotion.modified_when = self.deserialize_with_default(
                 "modified_when", data, self.modified_when, self.deserialize_datetime
             )
             # Only update once all fields have been verified and deserialized
-            self.promotion_id = new_promotion_id
-            self.promotion_name = new_promotion_name
-            self.promotion_description = new_promotion_description
-            self.promotion_type = new_promotion_type
-            self.promotion_scope = new_promotion_scope
-            self.start_date = new_start_date
-            self.end_date = new_end_date
-            self.promotion_value = new_promotion_value
-            self.promotion_code = new_promotion_code
-            self.created_by = new_created_by
-            self.modified_by = new_modified_by
-            self.created_when = new_created_when
-            self.modified_when = new_modified_when
+            self.promotion_id = updated_promotion.promotion_id
+            self.promotion_name = updated_promotion.promotion_name
+            self.promotion_description = updated_promotion.promotion_description
+            self.promotion_type = updated_promotion.promotion_type
+            self.promotion_scope = updated_promotion.promotion_scope
+            self.start_date = updated_promotion.start_date
+            self.end_date = updated_promotion.end_date
+            self.promotion_value = updated_promotion.promotion_value
+            self.promotion_code = updated_promotion.promotion_code
+            self.created_by = updated_promotion.created_by
+            self.modified_by = updated_promotion.modified_by
+            self.created_when = updated_promotion.created_when
+            self.modified_when = updated_promotion.modified_when
 
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error

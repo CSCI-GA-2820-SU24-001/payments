@@ -21,7 +21,7 @@ This service implements a REST API that allows you to Create, Read, Update
 and Delete Pets from the inventory of pets in the PetShop
 """
 
-from flask import request, abort
+from flask import request, abort, jsonify
 from flask import current_app as app  # Import Flask application
 from service.models import Promotion, DataValidationError
 from service.common import status  # HTTP Status Codes
@@ -56,11 +56,11 @@ def update(promotion_id):
         request_json = request.get_json()
         promotion = promotion.deserialize(request_json)
         promotion.update()
-        return promotion.serialize()
+        return jsonify(promotion.serialize())
     except DataValidationError as error:
-        abort_with_error(status.HTTP_400_BAD_REQUEST, f"Bad Request: {error}")
+        return abort_with_error(status.HTTP_400_BAD_REQUEST, f"Bad Request: {error}")
     except Exception as error:  # pylint: disable=broad-except
-        abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
+        return abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
 
 ######################################################################
 #  U T I L  F U N C T I O N S

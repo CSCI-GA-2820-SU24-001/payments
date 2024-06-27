@@ -9,8 +9,9 @@ from datetime import datetime
 from unittest import TestCase
 from wsgi import app
 from service.models import Promotion, DataValidationError, PromotionScope, PromotionType, db
-from .factories import PromotionFactory
 from service.common.datetime_utils import datetime_to_str
+from .factories import PromotionFactory
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -20,7 +21,7 @@ DATABASE_URI = os.getenv(
 ######################################################################
 #  Promotions   M O D E L   T E S T   C A S E S
 ######################################################################
-# pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods,duplicate-code
 class Promotions(TestCase):
     """Test Cases for Promotion Model"""
 
@@ -29,6 +30,7 @@ class Promotions(TestCase):
         """This runs once before the entire test suite"""
         app.config["TESTING"] = True
         app.config["DEBUG"] = False
+        # Set up test database
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
         app.app_context().push()
@@ -66,6 +68,25 @@ class Promotions(TestCase):
         assert serialized["created_by"] == test_promotion.created_by
         assert serialized["modified_by"] == test_promotion.modified_by
         assert serialized["created_when"] == datetime_to_str(test_promotion.created_when)
+        assert serialized["modified_when"] is None
+
+    def test_serialize_promotion_2(self):
+        """It should deserialize a Promotion into a dict"""
+        test_promotion = PromotionFactory()
+        serialized = test_promotion.serialize()
+        assert serialized["promotion_id"] == test_promotion.promotion_id
+        assert serialized["promotion_name"] == test_promotion.promotion_name
+        assert serialized["promotion_type"] == test_promotion.promotion_type.name
+        assert serialized["promotion_scope"] == test_promotion.promotion_scope.name
+        assert serialized["start_date"] == datetime_to_str(test_promotion.start_date)
+        assert serialized["end_date"] == datetime_to_str(test_promotion.end_date)
+        assert serialized["promotion_value"] == test_promotion.promotion_value
+        assert serialized["promotion_code"] == test_promotion.promotion_code
+        assert serialized["created_by"] == test_promotion.created_by
+        assert serialized["modified_by"] == test_promotion.modified_by
+        assert serialized["created_when"] == datetime_to_str(
+            test_promotion.created_when
+        )
         assert serialized["modified_when"] is None
 
     def test_serialized_promotion_with_missing_fields(self):
@@ -197,11 +218,18 @@ class Promotions(TestCase):
         test_promotion.promotion_name = "Updated Name"
         test_promotion.update()
 
+        db.session.expire_all()
         updated_promotion = Promotion.find(test_promotion.promotion_id)
         assert updated_promotion.promotion_name == "Updated Name"
 
     def test_update_invalid_promotion(self):
+        """ It should not update promotion and raise DataValidationError"""
         test_promotion = PromotionFactory()
         test_promotion.create()
         test_promotion.start_date = "InvalidDateFormat"
+        test_promotion.promotion_name = "Updated Name"
         self.assertRaises(DataValidationError, test_promotion.update)
+
+        db.session.expire_all()
+        updated_promotion = Promotion.find(test_promotion.promotion_id)
+        self.assertNotEqual(updated_promotion.promotion_name, "Updated Name")
