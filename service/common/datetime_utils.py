@@ -1,6 +1,10 @@
+"""
+Datetime utils to standardize conversion and manipulation of datetime objects.
+All datetime related functions should be defined here to prevent assumptions about the format ]
+of date-time objects and their string representations
+"""
+
 from datetime import datetime
-# Standardized datetime format
-DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def datetime_from_str(datetime_str: str) -> datetime:
@@ -15,15 +19,7 @@ def datetime_from_str(datetime_str: str) -> datetime:
     Returns:
         datetime: a datetime object
     """
-    formats = [DATETIME_FORMAT, "%Y-%m-%d %H:%M", "%Y-%m-%d"]
-    for fmt in formats:
-        try:
-            return datetime.strptime(datetime_str, fmt)
-        except ValueError:
-            continue
-    raise ValueError(
-        f"Time data '{datetime_str}' does not match any of the expected formats."
-    )
+    return datetime.fromisoformat(datetime_str)
 
 
 def datetime_to_str(datetime_obj: datetime) -> str:
@@ -35,4 +31,4 @@ def datetime_to_str(datetime_obj: datetime) -> str:
     Returns:
         str: string representation of the datetime object
     """
-    return datetime_obj.strftime(DATETIME_FORMAT)
+    return datetime_obj.isoformat()
