@@ -21,7 +21,7 @@ This service implements a REST API that allows you to Create, Read, Update
 and Delete Pets from the inventory of pets in the PetShop
 """
 
-from flask import jsonify, request, url_for, abort
+from flask import request, abort
 from flask import current_app as app  # Import Flask application
 from service.models import Promotion, DataValidationError
 from service.common import status  # HTTP Status Codes
@@ -54,9 +54,7 @@ def update(promotion_id):
                          f"Promotion with id: {promotion_id} not found")
     try:
         request_json = request.get_json()
-        print(f"Original Promotion: {promotion.serialize()}")
         promotion = promotion.deserialize(request_json)
-        print(f"New Promotion: {promotion.serialize()}")
         promotion.update()
         return promotion.serialize()
     except DataValidationError as error:
@@ -73,7 +71,7 @@ def abort_with_error(error_code, error_msg):
     """Aborts a request with a specific error code and message
 
     Args:
-        error_code (int): error code number 
+        error_code (int): error code number
         error_msg (str): description of the error
     """
     app.logger.error(error_msg)

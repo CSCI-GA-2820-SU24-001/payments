@@ -12,7 +12,7 @@ from service.common.datetime_utils import datetime_from_str, datetime_to_str
 logger = logging.getLogger("flask.app")
 
 # Create the SQLAlchemy object to be initialized later in init_db()
-db = SQLAlchemy()
+db = SQLAlchemy(session_options={"autoflush": False})
 
 
 class DataValidationError(Exception):
@@ -226,6 +226,7 @@ class Promotion(db.Model):
             new_modified_when = self.deserialize_with_default(
                 "modified_when", data, self.modified_when, self.deserialize_datetime
             )
+            # Only update once all fields have been verified and deserialized
             self.promotion_id = new_promotion_id
             self.promotion_name = new_promotion_name
             self.promotion_description = new_promotion_description
@@ -242,10 +243,6 @@ class Promotion(db.Model):
 
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error
-        except KeyError as error:
-            raise DataValidationError(
-                "Invalid YourResourceModel: missing " + error.args[0]
-            ) from error
         except TypeError as error:
             raise DataValidationError(
                 "Invalid YourResourceModel: body of request contained bad or no data "

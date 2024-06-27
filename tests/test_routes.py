@@ -72,8 +72,8 @@ class TestYourResourceService(TestCase):
             json=new_promotion_data,
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        db.session.expire_all()
         updated_promotion = Promotion.find(existing_promotion.promotion_id)
-        print(updated_promotion.serialize())
         assert updated_promotion.promotion_name == "New Promotion Name"
         assert updated_promotion.start_date == datetime_from_str(
             new_promotion_data["start_date"]
@@ -109,6 +109,7 @@ class TestYourResourceService(TestCase):
             f"/promotions/{184182325}", json=new_promotion_data
         )
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        db.session.expire_all()
         updated_promotion = Promotion.find(existing_promotion.promotion_id)
         assert updated_promotion.promotion_name != "New Promotion Name"
 
@@ -116,7 +117,6 @@ class TestYourResourceService(TestCase):
         """It should not update model and return a 400 not found when invalid data is supplied"""
         existing_promotion = PromotionFactory()
         existing_promotion.create()
-        print(f"Existing promotion: {existing_promotion.serialize()}")
 
         new_promotion_data = {
             "promotion_name": "Newest Promotion Name",
@@ -128,6 +128,33 @@ class TestYourResourceService(TestCase):
             json=new_promotion_data,
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        db.session.expire_all()
         updated_promotion = Promotion.find(existing_promotion.promotion_id)
-        print(f"Updated promotion: {updated_promotion.serialize()}")
         self.assertNotEqual(updated_promotion.promotion_name, new_promotion_data["promotion_name"])
+
+    def test_update_with_unknown_exception(self):
+        """It should not update model and return a 400 not found when invalid data is supplied"""
+        existing_promotion = PromotionFactory()
+        existing_promotion.create()
+
+        new_promotion_data = {
+            "promotion_name": "Newest Promotion Name",
+            "start_date": "2023-04-21",
+            "promotion_scope": "ENTIRE_STORE",
+        }
+        original_update = existing_promotion.update
+        try:
+            # Create mock function to raise connection error on any update
+            def mock_update_with_exception():
+                raise ConnectionError
+            existing_promotion.update = mock_update_with_exception
+            resp = self.client.put(
+                f"/promotions/{existing_promotion.promotion_id}",
+                json=new_promotion_data,
+            )
+            self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            db.session.expire_all()
+            saved_promotion = Promotion.find(existing_promotion.promotion_id)
+            self.assertNotEqual(saved_promotion.promotion_name, new_promotion_data["promotion_name"])
+        finally:
+            existing_promotion.update = original_update

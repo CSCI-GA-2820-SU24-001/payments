@@ -138,6 +138,36 @@ class Promotions(TestCase):
         self.assertRaises(DataValidationError, promotion.deserialize, invalid_json_type)
         self.assertRaises(DataValidationError, promotion.deserialize, invalid_json_scope)
         self.assertRaises(DataValidationError, promotion.deserialize, invalid_json_date)
+        assert promotion.promotion_name is None
+        assert promotion.promotion_description is None
+        assert promotion.promotion_scope is None
+        assert promotion.start_date is None
+
+    def test_deserialize_with_errors(self):
+        """It should raise a DataValidationError"""
+        promotion_json = {
+            "promotion_id": 123,
+            "promotion_name": "abcPromotion"
+        }
+        promotion = Promotion()
+        original_deserialize_with_default = promotion.deserialize_with_default
+        try:
+            # Type Error
+            def type_error_deserialize(key, data, default, deserializer=None):
+                raise TypeError("Some bad type")
+            promotion.deserialize_with_default = type_error_deserialize
+            self.assertRaises(DataValidationError, promotion.deserialize, promotion_json)
+
+            # Attribute Error
+            def attribute_error_deserialize(key, data, default, deserializer=None):
+                raise AttributeError("Some bad attribute")
+            promotion.deserialize_with_default = attribute_error_deserialize
+            self.assertRaises(
+                DataValidationError, promotion.deserialize, promotion_json
+            )
+
+        finally:
+            promotion.deserialize_with_default = original_deserialize_with_default
 
     def test_create_promotion(self):
         """It should create a Promotion"""
@@ -146,6 +176,8 @@ class Promotions(TestCase):
         test_promotion.create()
         assert test_promotion.promotion_name == "some_promotion"
         assert test_promotion.created_by == test_promotion.created_by
+        # Refresh session to get object from DB. Committed objects should remain.
+        db.session.expire_all()
         found = Promotion.all()
         self.assertEqual(len(found), 1)
         data = Promotion.find(test_promotion.promotion_id)
@@ -157,3 +189,19 @@ class Promotions(TestCase):
         test_promotion = PromotionFactory()
         test_promotion.start_date = "abcadw"
         self.assertRaises(DataValidationError, test_promotion.create)
+
+    def test_update_promotion(self):
+        """It should update an existing promotion"""
+        test_promotion = PromotionFactory()
+        test_promotion.create()
+        test_promotion.promotion_name = "Updated Name"
+        test_promotion.update()
+
+        updated_promotion = Promotion.find(test_promotion.promotion_id)
+        assert updated_promotion.promotion_name == "Updated Name"
+
+    def test_update_invalid_promotion(self):
+        test_promotion = PromotionFactory()
+        test_promotion.create()
+        test_promotion.start_date = "InvalidDateFormat"
+        self.assertRaises(DataValidationError, test_promotion.update)
