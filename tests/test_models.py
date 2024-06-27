@@ -98,20 +98,20 @@ class Promotions(TestCase):
             "modified_when": "2021-01-01",
         }
         promotion = Promotion()
-        promotion.deserialize(promotion_json)
-        assert promotion.promotion_id == 123
-        assert promotion.promotion_name == "abcPromotion"
-        assert promotion.promotion_description == "abcPromotionDescription"
-        assert promotion.promotion_type == PromotionType.PERCENTAGE
-        assert promotion.promotion_scope == PromotionScope.PRODUCT_ID
-        assert promotion.start_date == datetime(2021, 1, 1, 0, 0)
-        assert promotion.end_date == datetime(2021, 12, 31, 0, 0)
-        assert promotion.promotion_value == 10.0
-        assert promotion.promotion_code == "abcPromotionCode"
-        assert promotion.created_by == default_uuid
-        assert promotion.modified_by == default_uuid
-        assert promotion.created_when == datetime(2021, 1, 1, 0, 0)
-        assert promotion.modified_when == datetime(2021, 1, 1, 0, 0)
+        result = promotion.deserialize(promotion_json)
+        assert result.promotion_id == 123
+        assert result.promotion_name == "abcPromotion"
+        assert result.promotion_description == "abcPromotionDescription"
+        assert result.promotion_type == PromotionType.PERCENTAGE
+        assert result.promotion_scope == PromotionScope.PRODUCT_ID
+        assert result.start_date == datetime(2021, 1, 1, 0, 0)
+        assert result.end_date == datetime(2021, 12, 31, 0, 0)
+        assert result.promotion_value == 10.0
+        assert result.promotion_code == "abcPromotionCode"
+        assert result.created_by == default_uuid
+        assert result.modified_by == default_uuid
+        assert result.created_when == datetime(2021, 1, 1, 0, 0)
+        assert result.modified_when == datetime(2021, 1, 1, 0, 0)
 
     def test_deserialize_invalid_promotion(self):
         """ It should throw an exception for any invalid formats """

@@ -54,7 +54,9 @@ def update(promotion_id):
                          f"Promotion with id: {promotion_id} not found")
     try:
         request_json = request.get_json()
+        print(f"Original Promotion: {promotion.serialize()}")
         promotion = promotion.deserialize(request_json)
+        print(f"New Promotion: {promotion.serialize()}")
         promotion.update()
         return promotion.serialize()
     except DataValidationError as error:

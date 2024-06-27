@@ -184,48 +184,62 @@ class Promotion(db.Model):
             data (dict): A dictionary containing the promotion data
         """
         try:
-            self.promotion_id = self.deserialize_with_default(
+            new_promotion_id = self.deserialize_with_default(
                 "promotion_id", data, self.promotion_id
             )
-            self.promotion_name = self.deserialize_with_default(
+            new_promotion_name = self.deserialize_with_default(
                 "promotion_name", data, self.promotion_name
             )
-            self.promotion_description = self.deserialize_with_default(
+            new_promotion_description = self.deserialize_with_default(
                 "promotion_description", data, self.promotion_description
             )
-            self.promotion_type = self.deserialize_with_default(
+            new_promotion_type = self.deserialize_with_default(
                 "promotion_type", data, self.promotion_type, PromotionType.deserialize
             )
-            self.promotion_scope = self.deserialize_with_default(
+            new_promotion_scope = self.deserialize_with_default(
                 "promotion_scope",
                 data,
                 self.promotion_scope,
                 PromotionScope.deserialize,
             )
-            self.start_date = self.deserialize_with_default(
+            new_start_date = self.deserialize_with_default(
                 "start_date", data, self.start_date, self.deserialize_datetime
             )
-            self.end_date = self.deserialize_with_default(
+            new_end_date = self.deserialize_with_default(
                 "end_date", data, self.end_date, self.deserialize_datetime
             )
-            self.promotion_value = self.deserialize_with_default(
+            new_promotion_value = self.deserialize_with_default(
                 "promotion_value", data, self.promotion_value
             )
-            self.promotion_code = self.deserialize_with_default(
+            new_promotion_code = self.deserialize_with_default(
                 "promotion_code", data, self.promotion_code
             )
-            self.created_by = self.deserialize_with_default(
+            new_created_by = self.deserialize_with_default(
                 "created_by", data, self.created_by
             )
-            self.modified_by = self.deserialize_with_default(
+            new_modified_by = self.deserialize_with_default(
                 "modified_by", data, self.modified_by
             )
-            self.created_when = self.deserialize_with_default(
+            new_created_when = self.deserialize_with_default(
                 "created_when", data, self.created_when, self.deserialize_datetime
             )
-            self.modified_when = self.deserialize_with_default(
+            new_modified_when = self.deserialize_with_default(
                 "modified_when", data, self.modified_when, self.deserialize_datetime
             )
+            self.promotion_id = new_promotion_id
+            self.promotion_name = new_promotion_name
+            self.promotion_description = new_promotion_description
+            self.promotion_type = new_promotion_type
+            self.promotion_scope = new_promotion_scope
+            self.start_date = new_start_date
+            self.end_date = new_end_date
+            self.promotion_value = new_promotion_value
+            self.promotion_code = new_promotion_code
+            self.created_by = new_created_by
+            self.modified_by = new_modified_by
+            self.created_when = new_created_when
+            self.modified_when = new_modified_when
+
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
