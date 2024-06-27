@@ -44,7 +44,7 @@ def index():
 ######################################################################
 
 
-@app.route("/promotions/>int:promotion_id", methods=["PUT"])
+@app.route("/promotions/<int:promotion_id>", methods=["PUT"])
 def update(promotion_id):
     """Updates a Promotion with promotion_id with the fields included in the body of the request"""
     app.logger.info(f"Got request to update Promotion with id: {promotion_id}")
@@ -56,6 +56,7 @@ def update(promotion_id):
         request_json = request.get_json()
         promotion = promotion.deserialize(request_json)
         promotion.update()
+        return promotion.serialize()
     except DataValidationError as error:
         abort_with_error(status.HTTP_400_BAD_REQUEST, f"Bad Request: {error}")
     except Exception as error:  # pylint: disable=broad-except

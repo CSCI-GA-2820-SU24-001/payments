@@ -10,6 +10,7 @@ from unittest import TestCase
 from wsgi import app
 from service.models import Promotion, DataValidationError, PromotionScope, PromotionType, db
 from .factories import PromotionFactory
+from service.common.datetime_utils import datetime_to_str
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -17,11 +18,11 @@ DATABASE_URI = os.getenv(
 
 
 ######################################################################
-#  YourResourceModel   M O D E L   T E S T   C A S E S
+#  Promotions   M O D E L   T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestPromotions(TestCase):
-    """Test Cases for YourResourceModel Model"""
+class Promotions(TestCase):
+    """Test Cases for Promotion Model"""
 
     @classmethod
     def setUpClass(cls):
@@ -50,24 +51,22 @@ class TestPromotions(TestCase):
     #  T E S T   C A S E S
     ######################################################################
 
-    # Todo: Add your test cases here...
-
     def test_serialize_promotion(self):
         """ It should deserialize a Promotion into a dict"""
         test_promotion = PromotionFactory()
         serialized = test_promotion.serialize()
         assert serialized["promotion_id"] == test_promotion.promotion_id
         assert serialized["promotion_name"] == test_promotion.promotion_name
-        assert serialized["promotion_type"] == test_promotion.promotion_type
-        assert serialized["promotion_scope"] == test_promotion.promotion_scope
-        assert serialized["start_date"] == test_promotion.start_date
-        assert serialized["end_date"] == test_promotion.end_date
+        assert serialized["promotion_type"] == test_promotion.promotion_type.name
+        assert serialized["promotion_scope"] == test_promotion.promotion_scope.name
+        assert serialized["start_date"] == datetime_to_str(test_promotion.start_date)
+        assert serialized["end_date"] == datetime_to_str(test_promotion.end_date)
         assert serialized["promotion_value"] == test_promotion.promotion_value
         assert serialized["promotion_code"] == test_promotion.promotion_code
         assert serialized["created_by"] == test_promotion.created_by
         assert serialized["modified_by"] == test_promotion.modified_by
-        assert serialized["created_when"] == test_promotion.created_when
-        assert serialized["modified_when"] == test_promotion.modified_when
+        assert serialized["created_when"] == datetime_to_str(test_promotion.created_when)
+        assert serialized["modified_when"] is None
 
     def test_serialized_promotion_with_missing_fields(self):
         """ It should deserialize a Promotion into a dict with some fields as None"""
@@ -76,7 +75,7 @@ class TestPromotions(TestCase):
         test_promotion.modified_when = None
         serialized = test_promotion.serialize()
         assert serialized["promotion_id"] == test_promotion.promotion_id
-        assert serialized["promotion_type"] == test_promotion.promotion_type
+        assert serialized["promotion_type"] == test_promotion.promotion_type.name
         assert serialized["promotion_name"] is None
         assert serialized["modified_when"] is None
 

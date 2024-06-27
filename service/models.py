@@ -6,9 +6,9 @@ All of the models are stored in this module
 
 import logging
 import enum
-from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
+from service.common.datetime_utils import datetime_from_str, datetime_to_str
 logger = logging.getLogger("flask.app")
 
 # Create the SQLAlchemy object to be initialized later in init_db()
@@ -58,7 +58,6 @@ class Promotion(db.Model):
     """
     Class that represents a YourResourceModel
     """
-
     ##################################################
     # Table Schema
     ##################################################
@@ -122,16 +121,20 @@ class Promotion(db.Model):
             "promotion_id": self.promotion_id,
             "promotion_name": self.promotion_name,
             "promotion_description": self.promotion_description,
-            "promotion_type": self.promotion_type,
-            "promotion_scope": self.promotion_scope,
-            "start_date": self.start_date,
-            "end_date": self.end_date,
+            "promotion_type": self.promotion_type.name,
+            "promotion_scope": self.promotion_scope.name,
+            "start_date": datetime_to_str(self.start_date),
+            "end_date": datetime_to_str(self.end_date),
             "promotion_value": self.promotion_value,
             "promotion_code": self.promotion_code,
             "created_by": self.created_by,
             "modified_by": self.modified_by,
-            "created_when": self.created_when,
-            "modified_when": self.modified_when,
+            "created_when": datetime_to_str(self.created_when),
+            "modified_when": (
+                datetime_to_str(self.modified_when)
+                if self.modified_when
+                else None
+            ),
         }
 
     def deserialize_datetime(self, datetime_str: str):
@@ -141,15 +144,7 @@ class Promotion(db.Model):
             datetime_str: A string representing the date
         """
         try:
-            formats = ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d']
-            for fmt in formats:
-                try:
-                    return datetime.strptime(datetime_str, fmt)
-                except ValueError:
-                    continue
-            raise ValueError(
-                f"Time data '{datetime_str}' does not match any of the expected formats."
-            )
+            return datetime_from_str(datetime_str)
         except ValueError as error:
             raise DataValidationError(
                 f"Invalid date format: {datetime_str} does not conform to any valid datetime format"
