@@ -21,7 +21,7 @@ This service implements a REST API that allows you to Create, Read, Update
 and Delete Pets from the inventory of pets in the PetShop
 """
 
-from flask import request, abort, jsonify
+from flask import request, abort, jsonify, url_for
 from flask import current_app as app  # Import Flask application
 from service.models import Promotion, DataValidationError
 from service.common import status  # HTTP Status Codes
@@ -42,6 +42,29 @@ def index():
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
+
+@app.route("/promotions/create", methods=["POST"])
+def create_promotion():
+    """
+    Creates a new Promotion
+    This endpoint will create a Promotion based on the data in the body that is posted
+    """
+    app.logger.info("Request to create a Promotion")
+    check_content_type("application/json")
+    data = request.get_json()
+    promotion = Promotion()
+    try:
+        promotion.deserialize(data)
+        promotion.create()
+        message = promotion.serialize()
+        location_url = url_for("get_promotion", promotion_id=promotion.promotion_id, _external=True)
+        return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
+    except DataValidationError as error:
+        abort(status.HTTP_400_BAD_REQUEST, str(error))
+    except Exception as error:
+        app.logger.error("Unexpected error: %s", error)
+        abort(status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal Server Error")
+
 
 
 @app.route("/promotions/<int:promotion_id>", methods=["PUT"])
@@ -76,3 +99,9 @@ def abort_with_error(error_code, error_msg):
     """
     app.logger.error(error_msg)
     abort(error_code, error_msg)
+    
+def check_content_type(content_type):
+    """Checks that the media type is correct"""
+    if request.headers["Content-Type"] != content_type:
+        app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
+        abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, f"Content-Type must be {content_type}")
