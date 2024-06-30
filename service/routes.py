@@ -85,6 +85,20 @@ def update(promotion_id):
     except Exception as error:  # pylint: disable=broad-except
         return abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
 
+@app.route("/promotions/<int:promotion_id>", methods=["GET"])
+def read(promotion_id):
+    """ 
+    Read details of specific promotion id
+    """
+    app.logger.info("Request to Retrieve a promotion with promotion id [%s]", promotion_id)
+
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
+    
+    app.logger.info("Returning promotion: %s", promotion.promotion_name)
+    return jsonify(promotion.serialize()), status.HTTP_200_OK
+
 ######################################################################
 #  U T I L  F U N C T I O N S
 ######################################################################
