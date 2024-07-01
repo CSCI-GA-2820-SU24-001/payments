@@ -5,12 +5,12 @@ TestYourResourceModel API Service Test Suite
 import os
 import logging
 from unittest import TestCase
+from uuid import UUID
 from wsgi import app
 from service.common import status
 from service.common.datetime_utils import datetime_from_str, datetime_to_str
 from service.models import db, Promotion, PromotionScope
 from tests.factories import PromotionFactory
-from uuid import UUID
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -159,7 +159,7 @@ class TestYourResourceService(TestCase):
             self.assertNotEqual(saved_promotion.promotion_name, new_promotion_data["promotion_name"])
         finally:
             existing_promotion.update = original_update
-    
+
     def test_get_promotion(self):
         """It should Get a single Promotion"""
         existing_promotion = PromotionFactory()
@@ -184,5 +184,5 @@ class TestYourResourceService(TestCase):
         """It should not Get a Promotion thats not found"""
         existing_promotion = PromotionFactory()
         existing_promotion.create()
-        response = self.client.get(f"/promotions/1234567",)
+        response = self.client.get("/promotions/1234567",)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
