@@ -52,6 +52,49 @@ class TestYourResourceService(TestCase):
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
+    
+    def test_create_promotions_in_bulk(self, count):
+        """Factory method to create promotions in bulk"""
+        promotions = []
+        for _ in range(count):
+            promotion = PromotionFactory()
+            response = self.client.post(
+                "/promotions/create", json=promotion.serialize(), content_type="application/json"
+            )
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            new_promotion = response.get_json()
+            promotion.promotion_id = new_promotion["promotion_id"]
+            promotions.append(promotion)
+        return promotions
+
+    def test_create_promotion(self):
+        """Test creating a Promotion"""
+        promotion = PromotionFactory()
+        response = self.client.post(
+            "/promotions/create", json=promotion.serialize(), content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        new_promotion = response.get_json()
+        self.assertEqual(new_promotion["promotion_name"], promotion.promotion_name)
+        self.assertEqual(new_promotion["promotion_scope"], promotion.promotion_scope.name)
+        self.assertEqual(new_promotion["promotion_type"], promotion.promotion_type.name)
+        self.assertEqual(new_promotion["promotion_value"], promotion.promotion_value)
+
+    def test_create_promotion_missing_data(self):
+        """Test creating a Promotion with missing data"""
+        response = self.client.post(
+            "/promotions/create", json={}, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_promotion_invalid_content_type(self):
+        """Test creating a Promotion with an invalid content type"""
+        promotion = PromotionFactory()
+        response = self.client.post(
+            "/promotions/create", json=promotion.serialize(), content_type="text/plain"
+        )
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
 
     def test_index(self):
         """It should call the home page"""
