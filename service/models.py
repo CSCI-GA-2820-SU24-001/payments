@@ -64,11 +64,11 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
     promotion_id = db.Column(db.Integer, primary_key=True)
     promotion_name = db.Column(db.String(63))
     promotion_description = db.Column(db.String(255))
-    promotion_type = db.Column(db.Enum(PromotionType))
+    promotion_type = db.Column(db.Enum(PromotionType), nullable=False)
     promotion_scope = db.Column(db.Enum(PromotionScope))
-    start_date = db.Column(db.DateTime)
+    start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime)
-    promotion_value = db.Column(db.Double)
+    promotion_value = db.Column(db.Double, nullable=False)
     promotion_code = db.Column(db.String(63), nullable=True)
     created_by = db.Column(db.Uuid)
     modified_by = db.Column(db.Uuid, nullable=True)
@@ -170,6 +170,8 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             _type_: _description_
         """
         if key not in data:
+            return default
+        if data[key] is None:
             return default
         if deserializer is not None:
             return deserializer(data[key])
