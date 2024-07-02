@@ -43,7 +43,7 @@ def index():
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 
-@app.route("/promotions/create", methods=["POST"])
+@app.route("/promotions", methods=["POST"])
 def create_promotion():
     """
     Creates a new Promotion
@@ -57,15 +57,13 @@ def create_promotion():
         promotion.deserialize(data)
         promotion.create()
         message = promotion.serialize()
-        location_url = url_for("get_promotion", promotion_id=promotion.promotion_id, _external=True)
-        return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
+        # location_url = url_for("get_promotion", promotion_id=promotion.promotion_id, _external=True)
+        return jsonify(message), status.HTTP_201_CREATED
     except DataValidationError as error:
         abort(status.HTTP_400_BAD_REQUEST, str(error))
     except Exception as error:
         app.logger.error("Unexpected error: %s", error)
-        abort(status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal Server Error")
-
-
+        abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
 
 @app.route("/promotions/<int:promotion_id>", methods=["PUT"])
 def update(promotion_id):

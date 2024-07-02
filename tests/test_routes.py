@@ -5,6 +5,7 @@ TestYourResourceModel API Service Test Suite
 import os
 import logging
 from unittest import TestCase
+from unittest.mock import patch
 from wsgi import app
 from service.common import status
 from service.common.datetime_utils import datetime_from_str
@@ -51,27 +52,14 @@ class TestYourResourceService(TestCase):
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
-    
-    def test_create_promotions_in_bulk(self, count):
-        """Factory method to create promotions in bulk"""
-        promotions = []
-        for _ in range(count):
-            promotion = PromotionFactory()
-            response = self.client.post(
-                "/promotions/create", json=promotion.serialize(), content_type="application/json"
-            )
-            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-            new_promotion = response.get_json()
-            promotion.promotion_id = new_promotion["promotion_id"]
-            promotions.append(promotion)
-        return promotions
-
     def test_create_promotion(self):
         """Test creating a Promotion"""
         promotion = PromotionFactory()
+        print(promotion.serialize())
         response = self.client.post(
-            "/promotions/create", json=promotion.serialize(), content_type="application/json"
+            "/promotions", json=promotion.serialize(), content_type="application/json"
         )
+        print(response.get_data())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         new_promotion = response.get_json()
         self.assertEqual(new_promotion["promotion_name"], promotion.promotion_name)
@@ -82,18 +70,28 @@ class TestYourResourceService(TestCase):
     def test_create_promotion_missing_data(self):
         """Test creating a Promotion with missing data"""
         response = self.client.post(
-            "/promotions/create", json={}, content_type="application/json"
+            "/promotions", json={'promotion_name': 'some'}, content_type="application/json"
         )
+        print(response.get_data())
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_promotion_invalid_content_type(self):
         """Test creating a Promotion with an invalid content type"""
         promotion = PromotionFactory()
         response = self.client.post(
-            "/promotions/create", json=promotion.serialize(), content_type="text/plain"
+            "/promotions", json=promotion.serialize(), content_type="text/plain"
         )
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-
+    
+    def test_create_promotion_invalid_data(self):
+        """Test creating a Promotion for data validation error"""
+        promotion = PromotionFactory()
+        new_promotion = promotion.serialize()
+        new_promotion['modified_when'] = 'testInvalid'
+        response = self.client.post(
+            "/promotions", json=new_promotion, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST) 
 
     def test_index(self):
         """It should call the home page"""
