@@ -234,11 +234,19 @@ class Promotions(TestCase):
         updated_promotion = Promotion.find(test_promotion.promotion_id)
         self.assertNotEqual(updated_promotion.promotion_name, "Updated Name")
 
-    def test_delete_promotion():
-        """It should delete an existing promotion"""    
+    def test_delete_promotion(self):
+        """It should delete an existing promotion"""
         test_promotion = PromotionFactory()
         test_promotion.create()
         test_promotion.delete()
         db.session.expire_all()
         deleted_promotion = Promotion.find(test_promotion.promotion_id)
-        assert deleted_promotion is None
+        self.assertIsNone(deleted_promotion)
+
+    def test_delete_invalid_promotion(self):
+        """It should throw a DataValidationError"""
+        test_promotion = PromotionFactory()
+        test_promotion.start_date = "RandomStartDate"
+        self.assertRaises(DataValidationError, test_promotion.delete)
+        deleted_promotion = Promotion.find(test_promotion.promotion_id)
+        self.assertIsNone(deleted_promotion)

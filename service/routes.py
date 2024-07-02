@@ -61,7 +61,7 @@ def create_promotion():
         return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     except DataValidationError as error:
         abort(status.HTTP_400_BAD_REQUEST, str(error))
-    except Exception as error:
+    except Exception as error:  # pylint: disable=broad-except
         app.logger.error("Unexpected error: %s", error)
         abort(status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal Server Error")
 
@@ -83,7 +83,7 @@ def update(promotion_id):
         return abort_with_error(status.HTTP_400_BAD_REQUEST, f"Bad Request: {error}")
     except Exception as error:  # pylint: disable=broad-except
         return abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
-    
+
 
 @app.route("/promotions/<int:promotion_id>", methods=["GET"])
 def read(promotion_id):
@@ -97,7 +97,8 @@ def read(promotion_id):
     app.logger.info("Returning promotion: %s", promotion.promotion_name)
     return jsonify(promotion.serialize()), status.HTTP_200_OK
 
-@app.route("/promotions/<int:promotion_id>", methods=["PUT"])
+
+@app.route("/promotions/<int:promotion_id>", methods=["DELETE"])
 def delete(promotion_id):
     """Deletes a Promotion with promotion_id with the fields included in the body of the request"""
     app.logger.info(f"Got request to delete Promotion with id: {promotion_id}")
@@ -106,12 +107,8 @@ def delete(promotion_id):
         abort_with_error(status.HTTP_404_NOT_FOUND,
                          f"Promotion with id: {promotion_id} not found")
     try:
-        request_json = request.get_json()
-        promotion = promotion.deserialize(request_json)
         promotion.delete()
-        return jsonify(promotion.serialize())
-    except DataValidationError as error:
-        return abort_with_error(status.HTTP_400_BAD_REQUEST, f"Bad Request: {error}")
+        return jsonify({}), status.HTTP_200_OK
     except Exception as error:  # pylint: disable=broad-except
         return abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
 
