@@ -233,3 +233,13 @@ class Promotions(TestCase):
         db.session.expire_all()
         updated_promotion = Promotion.find(test_promotion.promotion_id)
         self.assertNotEqual(updated_promotion.promotion_name, "Updated Name")
+
+    # def test_delete_promotion(self):
+    #     """It should delete an existing promotion"""
+    #     test_promotion = PromotionFactory()
+    #     test_promotion.create()
+    #     test_promotion.delete()
+
+    #     db.session.expire_all()
+    #     deleted_promotion = Promotion.find(test_promotion.promotion_id)
+    #     assert delete_promotion.promotion_name == "Updated Name"
