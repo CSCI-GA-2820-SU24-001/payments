@@ -1,31 +1,207 @@
-# NYU DevOps Project Template
+# NYU DevOps Promotions Service
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Language-Python-blue.svg)](https://python.org/)
 
-This is a skeleton you can use to start your projects
-
 ## Overview
 
-This project template contains starter code for your class project. The `/service` folder contains your `models.py` file for your model and a `routes.py` file for your service. The `/tests` folder has test case starter code for testing the model and the service separately. All you need to do is add your functionality. You can use the [lab-flask-tdd](https://github.com/nyu-devops/lab-flask-tdd) for code examples to copy from.
+The Promotions Service is a representation of special promotions or sales that are applied to a product or the entire store. Examples of promotions include "buy 1 get 1 free" and "20% off". Discount promotions typically apply for a given duration, such as a sale lasting for one week only.
 
-## Automatic Setup
+## Project Setup
 
-The best way to use this repo is to start your own repo using it as a git template. To do this just press the green **Use this template** button in GitHub and this will become the source for your repository.
-
-## Manual Setup
-
-You can also clone this repository and then copy and paste the starter code into your project repo folder on your local computer. Be careful not to copy over your own `README.md` file so be selective in what you copy.
-
-There are 4 hidden files that you will need to copy manually if you use the Mac Finder or Windows Explorer to copy files from this folder into your repo folder.
+This project use docker container, VScode. To deploy locally, you can clone this repo, change into the repo directory then use "code ." to start the remote container in VScode ( remote connection extension is required).
 
 These should be copied using a bash shell as follows:
 
 ```bash
-    cp .gitignore  ../<your_repo_folder>/
-    cp .flaskenv ../<your_repo_folder>/
-    cp .gitattributes ../<your_repo_folder>/
+    git clone https://github.com/CSCI-GA-2820-SU24-001/promotions.git
+    cd promotions
+    code .
 ```
+
+## API Endpoints
+
+### Table of Endpoints
+
+| Endpoint               | HTTP Method | Description                                      |
+|------------------------|-------------|--------------------------------------------------|
+| `/promotions`          | `GET`       | Retrieve all promotions                          |
+| `/promotions`          | `POST`      | Create a new promotion                           |
+| `/promotions/<id>`     | `GET`       | Retrieve a promotion by its ID                   |
+| `/promotions/<id>`     | `PUT`       | Update a promotion by its ID                     |
+| `/promotions/<id>`     | `DELETE`    | Delete a promotion by its ID                     |
+| `/promotions/name/<name>` | `GET`    | Retrieve promotions by their name                |
+
+### Endpoints Description
+
+- **`GET /promotions`**
+  - Retrieves a list of all promotions in the database.
+  - **Response Example**:
+    ```json
+    [
+        {
+            "promotion_id": 1,
+            "promotion_name": "20% off",
+            "promotion_description": "20% off on all products",
+            "promotion_type": "PERCENTAGE",
+            "promotion_scope": "ENTIRE_STORE",
+            "start_date": "2024-01-01T00:00:00",
+            "end_date": "2024-01-07T23:59:59",
+            "promotion_value": 20.0,
+            "promotion_code": "SAVE20",
+            "created_by": "uuid",
+            "modified_by": "uuid",
+            "created_when": "2024-01-01T00:00:00",
+            "modified_when": "2024-01-01T00:00:00"
+        }
+    ]
+    ```
+
+- **`POST /promotions`**
+  - Creates a new promotion.
+  - **Request Body Example**:
+    ```json
+    {
+        "promotion_name": "20% off",
+        "promotion_description": "20% off on all products",
+        "promotion_type": "PERCENTAGE",
+        "promotion_scope": "ENTIRE_STORE",
+        "start_date": "2024-01-01T00:00:00",
+        "end_date": "2024-01-07T23:59:59",
+        "promotion_value": 20.0,
+        "promotion_code": "SAVE20",
+        "created_by": "uuid",
+        "modified_by": "uuid",
+        "created_when": "2024-01-01T00:00:00",
+        "modified_when": "2024-01-01T00:00:00"
+    }
+    ```
+
+- **`GET /promotions/<id>`**
+  - Retrieves a promotion by its ID.
+  - **Response Example**:
+    ```json
+    {
+        "promotion_id": 1,
+        "promotion_name": "20% off",
+        "promotion_description": "20% off on all products",
+        "promotion_type": "PERCENTAGE",
+        "promotion_scope": "ENTIRE_STORE",
+        "start_date": "2024-01-01T00:00:00",
+        "end_date": "2024-01-07T23:59:59",
+        "promotion_value": 20.0,
+        "promotion_code": "SAVE20",
+        "created_by": "uuid",
+        "modified_by": "uuid",
+        "created_when": "2024-01-01T00:00:00",
+        "modified_when": "2024-01-01T00:00:00"
+    }
+    ```
+
+- **`PUT /promotions/<id>`**
+  - Updates a promotion by its ID.
+  - **Request Body Example**:
+    ```json
+    {
+        "promotion_name": "25% off",
+        "promotion_description": "25% off on all products",
+        "promotion_type": "PERCENTAGE",
+        "promotion_scope": "ENTIRE_STORE",
+        "start_date": "2024-01-01T00:00:00",
+        "end_date": "2024-01-07T23:59:59",
+        "promotion_value": 25.0,
+        "promotion_code": "SAVE25",
+        "created_by": "uuid",
+        "modified_by": "uuid",
+        "created_when": "2024-01-01T00:00:00",
+        "modified_when": "2024-01-01T00:00:00"
+    }
+    ```
+
+- **`DELETE /promotions/<id>`**
+  - Deletes a promotion by its ID.
+  - **Response Example**:
+    ```json
+    {
+        "message": "Promotion with id 1 was deleted successfully"
+    }
+    ```
+
+- **`GET /promotions/name/<name>`**
+  - Retrieves promotions by their name.
+  - **Response Example**:
+    ```json
+    [
+        {
+            "promotion_id": 1,
+            "promotion_name": "20% off",
+            "promotion_description": "20% off on all products",
+            "promotion_type": "PERCENTAGE",
+            "promotion_scope": "ENTIRE_STORE",
+            "start_date": "2024-01-01T00:00:00",
+            "end_date": "2024-01-07T23:59:59",
+            "promotion_value": 20.0,
+            "promotion_code": "SAVE20",
+            "created_by": "uuid",
+            "modified_by": "uuid",
+            "created_when": "2024-01-01T00:00:00",
+            "modified_when": "2024-01-01T00:00:00"
+        }
+    ]
+    ```
+
+These API endpoints allow users to manage promotions effectively, including creating, retrieving, updating, and deleting promotions.
+
+
+## Test Cases for Promotion Service
+
+The completeness of this project can be verified through test cases. These should be copied using a bash shell as follows:
+
+```bash
+    pytest
+```
+
+
+### Class Methods
+
+| Test Method      | Description                                                                                   |
+|------------------|-----------------------------------------------------------------------------------------------|
+| `setUpClass`     | Runs once before the entire test suite, configuring the test environment.                     |
+| `tearDownClass`  | Runs once after the entire test suite, cleaning up the test environment.                      |
+| `setUp`          | Runs before each test method to ensure each test starts with a clean state.                   |
+| `tearDown`       | Runs after each test method to clean up any effects of the test method.                       |
+
+### Serialization and Deserialization
+
+| Test Method                                  | Description                                                                                   |
+|----------------------------------------------|-----------------------------------------------------------------------------------------------|
+| `test_serialize_promotion`                   | Tests serializing a `Promotion` instance into a dictionary.                                    |
+| `test_serialize_promotion_2`                 | A redundant serialization test, identical to `test_serialize_promotion`.                       |
+| `test_serialized_promotion_with_missing_fields` | Tests serializing a `Promotion` instance with some missing fields.                             |
+| `test_deserialize_promotion`                 | Tests deserializing a JSON object into a valid `Promotion` instance.                           |
+| `test_deserialize_invalid_promotion`         | Tests that deserializing JSON objects with invalid formats raises a `DataValidationError`.     |
+| `test_deserialize_with_errors`               | Tests that deserializing with type errors or attribute errors raises a `DataValidationError`.  |
+
+### Create, Update, and Read
+
+| Test Method                 | Description                                                                                   |
+|-----------------------------|-----------------------------------------------------------------------------------------------|
+| `test_create_promotion`     | Tests creating a `Promotion` instance.                                                        |
+| `test_create_invalid_promotion` | Tests that creating an invalid `Promotion` instance raises a `DataValidationError`.       |
+| `test_update_promotion`     | Tests updating an existing `Promotion` instance.                                              |
+| `test_update_invalid_promotion` | Tests that updating an invalid `Promotion` instance raises a `DataValidationError`.       |
+| `test_read_by_name`         | Tests reading `Promotion` instances by name.                                                  |
+
+### Test Logic
+
+| Aspect                                    | Description                                                                                   |
+|-------------------------------------------|-----------------------------------------------------------------------------------------------|
+| Core Functionalities                      | Each test case ensures core functionalities of the model, such as serialization, deserialization, creation, update, and read operations, work as expected. |
+| Validation and Exceptions                 | Uses `assert` statements and `self.assertRaises` to validate expected results and exceptions.  |
+| Test Data                                 | Utilizes factory methods (e.g., `PromotionFactory`) to create test data, ensuring test independence and reproducibility. |
+
+These tests ensure the correct behavior of the `Promotion` service, including data validation, data transformation, and basic CRUD operations.
+
 
 ## Contents
 
