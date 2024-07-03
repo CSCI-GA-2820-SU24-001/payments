@@ -221,23 +221,23 @@ class TestYourResourceService(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         db.session.expire_all()
 
-    # def test_delete_with_unknown_exception(self):
-    #     """It should not delete model and return a 400 not found when invalid data is supplied"""
-    #     existing_promotion = PromotionFactory()
-    #     existing_promotion.create()
+    def test_delete_with_unknown_exception(self):
+        """It should not delete model and return a 400 not found when invalid data is supplied"""
+        existing_promotion = PromotionFactory()
+        existing_promotion.create()
 
-    #     original_delete = existing_promotion.delete
-    #     try:
-    #         # Create mock function to raise connection error on any delete
-    #         def mock_delete_with_exception():
-    #             raise ConnectionError
-    #         existing_promotion.delete = mock_delete_with_exception
-    #         resp = self.client.delete(
-    #             f"/promotions/{existing_promotion.promotion_id}"
-    #         )
-    #         self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
-    #         db.session.expire_all()
-    #         saved_promotion = Promotion.find(existing_promotion.promotion_id)
-    #         self.assertIsNotNone(saved_promotion)
-    #     finally:
-    #         existing_promotion.delete = original_delete
+        original_delete = existing_promotion.delete
+        try:
+            # Create mock function to raise connection error on any delete
+            def mock_delete_with_exception():
+                raise ConnectionError
+            existing_promotion.delete = mock_delete_with_exception
+            resp = self.client.delete(
+                f"/promotions/{existing_promotion.promotion_id}"
+            )
+            self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            db.session.expire_all()
+            saved_promotion = Promotion.find(existing_promotion.promotion_id)
+            self.assertIsNotNone(saved_promotion)
+        finally:
+            existing_promotion.delete = original_delete
