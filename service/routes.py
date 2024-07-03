@@ -32,7 +32,7 @@ from service.common import status  # HTTP Status Codes
 ######################################################################
 @app.route("/")
 def index():
-    """ Root URL response """
+    """Root URL response"""
     return (
         jsonify({
             "DELETE /promotions/{promotion_id}": {
@@ -87,6 +87,7 @@ def index():
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 
+
 @app.route("/promotions/create", methods=["POST"])
 def create_promotion():
     """
@@ -100,7 +101,9 @@ def create_promotion():
         promotion.deserialize(data)
         promotion.create()
         message = promotion.serialize()
-        location_url = url_for("get_promotion", promotion_id=promotion.promotion_id, _external=True)
+        location_url = url_for(
+            "get_promotion", promotion_id=promotion.promotion_id, _external=True
+        )
         return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     except DataValidationError as error:
         abort(status.HTTP_400_BAD_REQUEST, str(error))
@@ -115,6 +118,7 @@ def update(promotion_id):
     app.logger.info(f"Got request to update Promotion with id: {promotion_id}")
     promotion = Promotion.find(promotion_id)
     if not promotion:
+
         abort_with_error(status.HTTP_404_NOT_FOUND,
                          f"Promotion with id: {promotion_id} not found")
     request_json = request.get_json()
@@ -128,12 +132,30 @@ def read(promotion_id):
     """
     Read details of specific promotion id
     """
-    app.logger.info("Request to Retrieve a promotion with promotion id [%s]", promotion_id)
+    app.logger.info(
+        "Request to Retrieve a promotion with promotion id [%s]", promotion_id
+    )
     promotion = Promotion.find(promotion_id)
     if not promotion:
-        abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Promotion with id '{promotion_id}' was not found.",
+        )
     app.logger.info("Returning promotion: %s", promotion.promotion_name)
     return jsonify(promotion.serialize()), status.HTTP_200_OK
+
+
+@app.route("/promotions/<int:promotion_id>", methods=["DELETE"])
+def delete(promotion_id):
+    """Deletes a Promotion with promotion_id with the fields included in the body of the request"""
+    app.logger.info(f"Got request to delete Promotion with id: {promotion_id}")
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort_with_error(
+            status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+        )
+    promotion.delete()
+    return jsonify({}), status.HTTP_204_NO_CONTENT
 
 
 @app.route("/promotions", methods=["GET"])
