@@ -94,6 +94,7 @@ def create_promotion():
     This endpoint will create a Promotion based on the data in the body that is posted
     """
     app.logger.info("Request to create a Promotion")
+    check_content_type("application/json")
     data = request.get_json()
     promotion = Promotion()
     try:
@@ -104,10 +105,9 @@ def create_promotion():
         return jsonify(message), status.HTTP_201_CREATED
     except DataValidationError as error:
         abort(status.HTTP_400_BAD_REQUEST, str(error))
-    except Exception as error:  # pylint: disable=broad-except
+    except Exception as error:
         app.logger.error("Unexpected error: %s", error)
         abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
-
 
 @app.route("/promotions/<int:promotion_id>", methods=["PUT"])
 def update(promotion_id):
@@ -160,3 +160,9 @@ def abort_with_error(error_code, error_msg):
     """
     app.logger.error(error_msg)
     abort(error_code, error_msg)
+    
+def check_content_type(content_type):
+    """Checks that the media type is correct"""
+    if request.headers["Content-Type"] != content_type:
+        app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
+        abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, f"Content-Type must be {content_type}")
