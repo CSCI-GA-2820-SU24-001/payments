@@ -118,11 +118,9 @@ def delete(promotion_id):
         abort_with_error(
             status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
         )
-    # try:
     promotion.delete()
     return jsonify({}), status.HTTP_204_NO_CONTENT
-    # except Exception as error:  # pylint: disable=broad-except
-    #     return abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
+    
 
 
 ######################################################################
