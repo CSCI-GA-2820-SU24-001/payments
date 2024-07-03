@@ -153,52 +153,6 @@ These should be copied using a bash shell as follows:
 These API endpoints allow users to manage promotions effectively, including creating, retrieving, updating, and deleting promotions.
 
 
-## Test Cases for Promotion Service
-
-The completeness of this project can be verified through test cases. 
-
-
-### Class Methods
-
-| Test Method      | Description                                                                                   |
-|------------------|-----------------------------------------------------------------------------------------------|
-| `setUpClass`     | Runs once before the entire test suite, configuring the test environment.                     |
-| `tearDownClass`  | Runs once after the entire test suite, cleaning up the test environment.                      |
-| `setUp`          | Runs before each test method to ensure each test starts with a clean state.                   |
-| `tearDown`       | Runs after each test method to clean up any effects of the test method.                       |
-
-### Serialization and Deserialization
-
-| Test Method                                  | Description                                                                                   |
-|----------------------------------------------|-----------------------------------------------------------------------------------------------|
-| `test_serialize_promotion`                   | Tests serializing a `Promotion` instance into a dictionary.                                    |
-| `test_serialize_promotion_2`                 | A redundant serialization test, identical to `test_serialize_promotion`.                       |
-| `test_serialized_promotion_with_missing_fields` | Tests serializing a `Promotion` instance with some missing fields.                             |
-| `test_deserialize_promotion`                 | Tests deserializing a JSON object into a valid `Promotion` instance.                           |
-| `test_deserialize_invalid_promotion`         | Tests that deserializing JSON objects with invalid formats raises a `DataValidationError`.     |
-| `test_deserialize_with_errors`               | Tests that deserializing with type errors or attribute errors raises a `DataValidationError`.  |
-
-### Create, Update, and Read
-
-| Test Method                 | Description                                                                                   |
-|-----------------------------|-----------------------------------------------------------------------------------------------|
-| `test_create_promotion`     | Tests creating a `Promotion` instance.                                                        |
-| `test_create_invalid_promotion` | Tests that creating an invalid `Promotion` instance raises a `DataValidationError`.       |
-| `test_update_promotion`     | Tests updating an existing `Promotion` instance.                                              |
-| `test_update_invalid_promotion` | Tests that updating an invalid `Promotion` instance raises a `DataValidationError`.       |
-| `test_read_by_name`         | Tests reading `Promotion` instances by name.                                                  |
-
-### Test Logic
-
-| Aspect                                    | Description                                                                                   |
-|-------------------------------------------|-----------------------------------------------------------------------------------------------|
-| Core Functionalities                      | Each test case ensures core functionalities of the model, such as serialization, deserialization, creation, update, and read operations, work as expected. |
-| Validation and Exceptions                 | Uses `assert` statements and `self.assertRaises` to validate expected results and exceptions.  |
-| Test Data                                 | Utilizes factory methods (e.g., `PromotionFactory`) to create test data, ensuring test independence and reproducibility. |
-
-These tests ensure the correct behavior of the `Promotion` service, including data validation, data transformation, and basic CRUD operations.
-
-
 ## Contents
 
 The project contains the following:

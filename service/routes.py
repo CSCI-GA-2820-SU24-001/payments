@@ -151,9 +151,12 @@ def read(promotion_id):
 def delete(promotion_id):
     """Deletes a Promotion with promotion_id with the fields included in the body of the request"""
     app.logger.info(f"Got request to delete Promotion with id: {promotion_id}")
+
     promotion = Promotion.find(promotion_id)
     if promotion:
         promotion.delete()
+
+    app.logger.info(f"Promotion with id {promotion_id} delete complete.")
     return jsonify({}), status.HTTP_204_NO_CONTENT
 
 
