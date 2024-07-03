@@ -155,11 +155,7 @@ These API endpoints allow users to manage promotions effectively, including crea
 
 ## Test Cases for Promotion Service
 
-The completeness of this project can be verified through test cases. These should be copied using a bash shell as follows:
-
-```bash
-    pytest
-```
+The completeness of this project can be verified through test cases. 
 
 
 ### Class Methods
