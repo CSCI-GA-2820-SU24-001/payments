@@ -32,60 +32,58 @@ from service.common import status  # HTTP Status Codes
 ######################################################################
 @app.route("/")
 def index():
-    """ Root URL response """
+    """Root URL response"""
     return (
-        jsonify({
-            "DELETE /promotions/{promotion_id}": {
-                "description": "Deletes a specific promotion by ID",
-                "params": {
-                    "promotion_id": "ID of the promotion to delete"
-                }
-            },
-            "GET /promotions": {
-                "description": "Retrieves all promotions"
-            },
-            "GET /promotions/{promotion_id}": {
-                "description": "Retrieves a specific promotion by ID",
-                "params": {
-                    "promotion_id": "ID of the promotion to retrieve"
-                }
-            },
-            "POST /promotions/create": {
-                "description": "Creates a new promotion",
-                "params": {
-                    "end_date": "End date of the promotion in YYYY-MM-DD format",
-                    "promotion_code": "Unique code for the promotion",
-                    "promotion_description": "Description of the promotion",
-                    "promotion_name": "Name of the promotion",
-                    "promotion_scope": "Scope of the promotion",
-                    "promotion_type": "Type of the promotion",
-                    "promotion_value": "Value associated with the promotion",
-                    "start_date": "Start date of the promotion in YYYY-MM-DD format",
-                    "created_by": "ID of the user creating the promotion"
-                }
-            },
-            "PUT /promotions/{promotion_id}": {
-                "description": "Updates a specific promotion",
-                "params": {
-                    "end_date": "End date of the promotion in YYYY-MM-DD format",
-                    "promotion_code": "Unique code for the promotion",
-                    "promotion_description": "Description of the promotion",
-                    "promotion_id": "ID of the promotion to update",
-                    "promotion_name": "Name of the promotion",
-                    "promotion_scope": "Scope of the promotion",
-                    "promotion_type": "Type of the promotion",
-                    "promotion_value": "Value associated with the promotion",
-                    "start_date": "Start date of the promotion in YYYY-MM-DD format",
-                    "modified_by": "ID of the user modifying the promotion"
-                }
+        jsonify(
+            {
+                "DELETE /promotions/{promotion_id}": {
+                    "description": "Deletes a specific promotion by ID",
+                    "params": {"promotion_id": "ID of the promotion to delete"},
+                },
+                "GET /promotions": {"description": "Retrieves all promotions"},
+                "GET /promotions/{promotion_id}": {
+                    "description": "Retrieves a specific promotion by ID",
+                    "params": {"promotion_id": "ID of the promotion to retrieve"},
+                },
+                "POST /promotions/create": {
+                    "description": "Creates a new promotion",
+                    "params": {
+                        "end_date": "End date of the promotion in YYYY-MM-DD format",
+                        "promotion_code": "Unique code for the promotion",
+                        "promotion_description": "Description of the promotion",
+                        "promotion_name": "Name of the promotion",
+                        "promotion_scope": "Scope of the promotion",
+                        "promotion_type": "Type of the promotion",
+                        "promotion_value": "Value associated with the promotion",
+                        "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                        "created_by": "ID of the user creating the promotion",
+                    },
+                },
+                "PUT /promotions/{promotion_id}": {
+                    "description": "Updates a specific promotion",
+                    "params": {
+                        "end_date": "End date of the promotion in YYYY-MM-DD format",
+                        "promotion_code": "Unique code for the promotion",
+                        "promotion_description": "Description of the promotion",
+                        "promotion_id": "ID of the promotion to update",
+                        "promotion_name": "Name of the promotion",
+                        "promotion_scope": "Scope of the promotion",
+                        "promotion_type": "Type of the promotion",
+                        "promotion_value": "Value associated with the promotion",
+                        "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                        "modified_by": "ID of the user modifying the promotion",
+                    },
+                },
             }
-        }), status.HTTP_200_OK
+        ),
+        status.HTTP_200_OK,
     )
 
 
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
+
 
 @app.route("/promotions", methods=["POST"])
 def create_promotion():
@@ -101,8 +99,10 @@ def create_promotion():
         promotion.deserialize(data)
         promotion.create()
         message = promotion.serialize()
-        # location_url = url_for("get_promotion", promotion_id=promotion.promotion_id, _external=True)
-        return jsonify(message), status.HTTP_201_CREATED
+        location_url = url_for(
+            "get_promotion", promotion_id=promotion.promotion_id, _external=True
+        )
+        return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     except DataValidationError as error:
         abort(status.HTTP_400_BAD_REQUEST, str(error))
     except Exception as error:
@@ -115,8 +115,10 @@ def update(promotion_id):
     app.logger.info(f"Got request to update Promotion with id: {promotion_id}")
     promotion = Promotion.find(promotion_id)
     if not promotion:
-        abort_with_error(status.HTTP_404_NOT_FOUND,
-                         f"Promotion with id: {promotion_id} not found")
+
+        abort_with_error(
+            status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+        )
     request_json = request.get_json()
     promotion = promotion.deserialize(request_json)
     promotion.update()
@@ -128,12 +130,27 @@ def read(promotion_id):
     """
     Read details of specific promotion id
     """
-    app.logger.info("Request to Retrieve a promotion with promotion id [%s]", promotion_id)
+    app.logger.info(
+        "Request to Retrieve a promotion with promotion id [%s]", promotion_id
+    )
     promotion = Promotion.find(promotion_id)
     if not promotion:
-        abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Promotion with id '{promotion_id}' was not found.",
+        )
     app.logger.info("Returning promotion: %s", promotion.promotion_name)
     return jsonify(promotion.serialize()), status.HTTP_200_OK
+
+
+@app.route("/promotions/<int:promotion_id>", methods=["DELETE"])
+def delete(promotion_id):
+    """Deletes a Promotion with promotion_id with the fields included in the body of the request"""
+    app.logger.info(f"Got request to delete Promotion with id: {promotion_id}")
+    promotion = Promotion.find(promotion_id)
+    if promotion:
+        promotion.delete()
+    return jsonify({}), status.HTTP_204_NO_CONTENT
 
 
 @app.route("/promotions", methods=["GET"])
@@ -143,7 +160,10 @@ def read_all():
     """
     app.logger.info("Request to Retrieve all promotions")
     promotions = Promotion.all()
-    return jsonify([promotion.serialize() for promotion in promotions]), status.HTTP_200_OK
+    return (
+        jsonify([promotion.serialize() for promotion in promotions]),
+        status.HTTP_200_OK,
+    )
 
 
 ######################################################################
