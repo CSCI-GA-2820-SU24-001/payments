@@ -21,15 +21,16 @@ This service implements a REST API that allows you to Create, Read, Update
 and Delete Pets from the inventory of pets in the PetShop
 """
 
-from flask import request, abort, jsonify
+from flask import request, abort, jsonify, url_for
 from flask import current_app as app  # Import Flask application
 from service.models import Promotion, DataValidationError
 from service.common import status  # HTTP Status Codes
 
-
 ######################################################################
 # GET INDEX
 ######################################################################
+
+
 @app.route("/")
 def index():
     """Root URL response"""
@@ -92,7 +93,9 @@ def create_promotion():
     This endpoint will create a Promotion based on the data in the body that is posted
     """
     app.logger.info("Request to create a Promotion")
-    check_content_type("application/json")
+    if request.content_type != "application/json":
+        app.logger.error("Invalid Content-Type: ", {request.content_type})
+        abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, description="Content-Type must be application/json")
     data = request.get_json()
     promotion = Promotion()
     try:
@@ -100,7 +103,7 @@ def create_promotion():
         promotion.create()
         message = promotion.serialize()
         location_url = url_for(
-            "get_promotion", promotion_id=promotion.promotion_id, _external=True
+            "read", promotion_id=promotion.promotion_id, _external=True
         )
         return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     except DataValidationError as error:
@@ -108,6 +111,7 @@ def create_promotion():
     except Exception as error:
         app.logger.error("Unexpected error: %s", error)
         abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
+
 
 @app.route("/promotions/<int:promotion_id>", methods=["PUT"])
 def update(promotion_id):
@@ -180,9 +184,3 @@ def abort_with_error(error_code, error_msg):
     """
     app.logger.error(error_msg)
     abort(error_code, error_msg)
-    
-def check_content_type(content_type):
-    """Checks that the media type is correct"""
-    if request.headers["Content-Type"] != content_type:
-        app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
-        abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, f"Content-Type must be {content_type}")

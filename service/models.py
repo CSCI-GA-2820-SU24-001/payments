@@ -61,19 +61,6 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
     ##################################################
     # Table Schema
     ##################################################
-    # promotion_id = db.Column(db.Integer, primary_key=True)
-    # promotion_name = db.Column(db.String(63))
-    # promotion_description = db.Column(db.String(255))
-    # promotion_type = db.Column(db.Enum(PromotionType), nullable=False)
-    # promotion_scope = db.Column(db.Enum(PromotionScope))
-    # start_date = db.Column(db.DateTime, nullable=False)
-    # end_date = db.Column(db.DateTime)
-    # promotion_value = db.Column(db.Double, nullable=False)
-    # promotion_code = db.Column(db.String(63), nullable=True)
-    # created_by = db.Column(db.Uuid)
-    # modified_by = db.Column(db.Uuid, nullable=True)
-    # created_when = db.Column(db.DateTime)
-    # modified_when = db.Column(db.DateTime)
     promotion_id = db.Column(db.Integer, primary_key=True)
     promotion_name = db.Column(db.String(63), nullable=False)
     promotion_description = db.Column(db.String(255), nullable=False)

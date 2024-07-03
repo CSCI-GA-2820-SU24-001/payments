@@ -31,5 +31,4 @@ def datetime_to_str(datetime_obj: datetime) -> str:
     Returns:
         str: string representation of the datetime object
     """
-    
     return datetime_obj.isoformat()

@@ -189,12 +189,12 @@ class Promotions(TestCase):
 
         finally:
             promotion.deserialize_with_default = original_deserialize_with_default
-    
+
     def test_create_missing_data(self):
         test_promotion = Promotion()
         test_promotion.name = "Name"
-        
-        self.assertRaises(DataValidationError,test_promotion.create)        
+
+        self.assertRaises(DataValidationError, test_promotion.create)
 
     def test_create_promotion(self):
         """It should create a Promotion"""
