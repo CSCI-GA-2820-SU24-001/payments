@@ -34,8 +34,52 @@ from service.common import status  # HTTP Status Codes
 def index():
     """Root URL response"""
     return (
-        "Reminder: return some useful information in json format about the service here",
-        status.HTTP_200_OK,
+        jsonify({
+            "DELETE /promotions/{promotion_id}": {
+                "description": "Deletes a specific promotion by ID",
+                "params": {
+                    "promotion_id": "ID of the promotion to delete"
+                }
+            },
+            "GET /promotions": {
+                "description": "Retrieves all promotions"
+            },
+            "GET /promotions/{promotion_id}": {
+                "description": "Retrieves a specific promotion by ID",
+                "params": {
+                    "promotion_id": "ID of the promotion to retrieve"
+                }
+            },
+            "POST /promotions/create": {
+                "description": "Creates a new promotion",
+                "params": {
+                    "end_date": "End date of the promotion in YYYY-MM-DD format",
+                    "promotion_code": "Unique code for the promotion",
+                    "promotion_description": "Description of the promotion",
+                    "promotion_name": "Name of the promotion",
+                    "promotion_scope": "Scope of the promotion",
+                    "promotion_type": "Type of the promotion",
+                    "promotion_value": "Value associated with the promotion",
+                    "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                    "created_by": "ID of the user creating the promotion"
+                }
+            },
+            "PUT /promotions/{promotion_id}": {
+                "description": "Updates a specific promotion",
+                "params": {
+                    "end_date": "End date of the promotion in YYYY-MM-DD format",
+                    "promotion_code": "Unique code for the promotion",
+                    "promotion_description": "Description of the promotion",
+                    "promotion_id": "ID of the promotion to update",
+                    "promotion_name": "Name of the promotion",
+                    "promotion_scope": "Scope of the promotion",
+                    "promotion_type": "Type of the promotion",
+                    "promotion_value": "Value associated with the promotion",
+                    "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                    "modified_by": "ID of the user modifying the promotion"
+                }
+            }
+        }), status.HTTP_200_OK
     )
 
 
@@ -51,7 +95,6 @@ def create_promotion():
     This endpoint will create a Promotion based on the data in the body that is posted
     """
     app.logger.info("Request to create a Promotion")
-    check_content_type("application/json")
     data = request.get_json()
     promotion = Promotion()
     try:
@@ -75,20 +118,13 @@ def update(promotion_id):
     app.logger.info(f"Got request to update Promotion with id: {promotion_id}")
     promotion = Promotion.find(promotion_id)
     if not promotion:
-        abort_with_error(
-            status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
-        )
-    try:
-        request_json = request.get_json()
-        promotion = promotion.deserialize(request_json)
-        promotion.update()
-        return jsonify(promotion.serialize())
-    except DataValidationError as error:
-        return abort_with_error(status.HTTP_400_BAD_REQUEST, f"Bad Request: {error}")
-    except Exception as error:  # pylint: disable=broad-except
-        return abort_with_error(
-            status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}"
-        )
+
+        abort_with_error(status.HTTP_404_NOT_FOUND,
+                         f"Promotion with id: {promotion_id} not found")
+    request_json = request.get_json()
+    promotion = promotion.deserialize(request_json)
+    promotion.update()
+    return jsonify(promotion.serialize())
 
 
 @app.route("/promotions/<int:promotion_id>", methods=["GET"])
@@ -109,6 +145,7 @@ def read(promotion_id):
     return jsonify(promotion.serialize()), status.HTTP_200_OK
 
 
+
 @app.route("/promotions/<int:promotion_id>", methods=["DELETE"])
 def delete(promotion_id):
     """Deletes a Promotion with promotion_id with the fields included in the body of the request"""
@@ -121,6 +158,16 @@ def delete(promotion_id):
     promotion.delete()
     return jsonify({}), status.HTTP_204_NO_CONTENT
     
+
+@app.route("/promotions", methods=["GET"])
+def read_all():
+    """
+    Read details of specific promotion id
+    """
+    app.logger.info("Request to Retrieve all promotions")
+    promotions = Promotion.all()
+    return jsonify([promotion.serialize() for promotion in promotions]), status.HTTP_200_OK
+
 
 
 ######################################################################
@@ -137,13 +184,3 @@ def abort_with_error(error_code, error_msg):
     """
     app.logger.error(error_msg)
     abort(error_code, error_msg)
-
-
-def check_content_type(content_type):
-    """Checks that the media type is correct"""
-    if request.headers["Content-Type"] != content_type:
-        app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
-        abort(
-            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            f"Content-Type must be {content_type}",
-        )
