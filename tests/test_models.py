@@ -191,6 +191,7 @@ class Promotions(TestCase):
             promotion.deserialize_with_default = original_deserialize_with_default
 
     def test_create_missing_data(self):
+        """It should throw a validation error since required fields are empty"""
         test_promotion = Promotion()
         test_promotion.name = "Name"
 

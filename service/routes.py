@@ -23,7 +23,7 @@ and Delete Pets from the inventory of pets in the PetShop
 
 from flask import request, abort, jsonify, url_for
 from flask import current_app as app  # Import Flask application
-from service.models import Promotion, DataValidationError
+from service.models import Promotion
 from service.common import status  # HTTP Status Codes
 
 ######################################################################
@@ -98,19 +98,13 @@ def create_promotion():
         abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, description="Content-Type must be application/json")
     data = request.get_json()
     promotion = Promotion()
-    try:
-        promotion.deserialize(data)
-        promotion.create()
-        message = promotion.serialize()
-        location_url = url_for(
-            "read", promotion_id=promotion.promotion_id, _external=True
-        )
-        return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
-    except DataValidationError as error:
-        abort(status.HTTP_400_BAD_REQUEST, str(error))
-    except Exception as error:
-        app.logger.error("Unexpected error: %s", error)
-        abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
+    promotion.deserialize(data)
+    promotion.create()
+    message = promotion.serialize()
+    location_url = url_for(
+        "read", promotion_id=promotion.promotion_id, _external=True
+    )
+    return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
 
 @app.route("/promotions/<int:promotion_id>", methods=["PUT"])
