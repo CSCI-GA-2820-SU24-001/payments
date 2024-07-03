@@ -70,7 +70,7 @@ class TestYourResourceService(TestCase):
     def test_create_promotion_missing_data(self):
         """Test creating a Promotion with missing data"""
         response = self.client.post(
-            "/promotions", json={'promotion_name': 'some'}, content_type="application/json"
+            "/promotions", json={}, content_type="application/json"
         )
         print(response.get_data())
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
