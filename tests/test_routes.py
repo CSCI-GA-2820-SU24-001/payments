@@ -229,7 +229,7 @@ class TestYourResourceService(TestCase):
         existing_promotion.create()
 
         resp = self.client.delete(f"/promotions/{184182325}")
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         db.session.expire_all()
 
     def test_delete_with_unknown_exception(self):
@@ -242,10 +242,9 @@ class TestYourResourceService(TestCase):
             # Create mock function to raise connection error on any delete
             def mock_delete_with_exception():
                 raise ConnectionError
+
             existing_promotion.delete = mock_delete_with_exception
-            resp = self.client.delete(
-                f"/promotions/{existing_promotion.promotion_id}"
-            )
+            resp = self.client.delete(f"/promotions/{existing_promotion.promotion_id}")
             self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
             db.session.expire_all()
             saved_promotion = Promotion.find(existing_promotion.promotion_id)
@@ -254,7 +253,7 @@ class TestYourResourceService(TestCase):
             existing_promotion.delete = original_delete
 
     def test_list_all_promotions(self):
-        """ It should return all promotions in the database """
+        """It should return all promotions in the database"""
         promotion_1 = PromotionFactory()
         promotion_2 = PromotionFactory()
         promotion_1.create()
@@ -282,10 +281,14 @@ class TestYourResourceService(TestCase):
 
         original_all = Promotion.all
         try:
+
             def mock_all():
                 raise ConnectionError
+
             Promotion.all = mock_all
             response = self.client.get("/promotions")
-            self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            self.assertEqual(
+                response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         finally:
             Promotion.all = original_all

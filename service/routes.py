@@ -34,52 +34,49 @@ from service.common import status  # HTTP Status Codes
 def index():
     """Root URL response"""
     return (
-        jsonify({
-            "DELETE /promotions/{promotion_id}": {
-                "description": "Deletes a specific promotion by ID",
-                "params": {
-                    "promotion_id": "ID of the promotion to delete"
-                }
-            },
-            "GET /promotions": {
-                "description": "Retrieves all promotions"
-            },
-            "GET /promotions/{promotion_id}": {
-                "description": "Retrieves a specific promotion by ID",
-                "params": {
-                    "promotion_id": "ID of the promotion to retrieve"
-                }
-            },
-            "POST /promotions/create": {
-                "description": "Creates a new promotion",
-                "params": {
-                    "end_date": "End date of the promotion in YYYY-MM-DD format",
-                    "promotion_code": "Unique code for the promotion",
-                    "promotion_description": "Description of the promotion",
-                    "promotion_name": "Name of the promotion",
-                    "promotion_scope": "Scope of the promotion",
-                    "promotion_type": "Type of the promotion",
-                    "promotion_value": "Value associated with the promotion",
-                    "start_date": "Start date of the promotion in YYYY-MM-DD format",
-                    "created_by": "ID of the user creating the promotion"
-                }
-            },
-            "PUT /promotions/{promotion_id}": {
-                "description": "Updates a specific promotion",
-                "params": {
-                    "end_date": "End date of the promotion in YYYY-MM-DD format",
-                    "promotion_code": "Unique code for the promotion",
-                    "promotion_description": "Description of the promotion",
-                    "promotion_id": "ID of the promotion to update",
-                    "promotion_name": "Name of the promotion",
-                    "promotion_scope": "Scope of the promotion",
-                    "promotion_type": "Type of the promotion",
-                    "promotion_value": "Value associated with the promotion",
-                    "start_date": "Start date of the promotion in YYYY-MM-DD format",
-                    "modified_by": "ID of the user modifying the promotion"
-                }
+        jsonify(
+            {
+                "DELETE /promotions/{promotion_id}": {
+                    "description": "Deletes a specific promotion by ID",
+                    "params": {"promotion_id": "ID of the promotion to delete"},
+                },
+                "GET /promotions": {"description": "Retrieves all promotions"},
+                "GET /promotions/{promotion_id}": {
+                    "description": "Retrieves a specific promotion by ID",
+                    "params": {"promotion_id": "ID of the promotion to retrieve"},
+                },
+                "POST /promotions/create": {
+                    "description": "Creates a new promotion",
+                    "params": {
+                        "end_date": "End date of the promotion in YYYY-MM-DD format",
+                        "promotion_code": "Unique code for the promotion",
+                        "promotion_description": "Description of the promotion",
+                        "promotion_name": "Name of the promotion",
+                        "promotion_scope": "Scope of the promotion",
+                        "promotion_type": "Type of the promotion",
+                        "promotion_value": "Value associated with the promotion",
+                        "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                        "created_by": "ID of the user creating the promotion",
+                    },
+                },
+                "PUT /promotions/{promotion_id}": {
+                    "description": "Updates a specific promotion",
+                    "params": {
+                        "end_date": "End date of the promotion in YYYY-MM-DD format",
+                        "promotion_code": "Unique code for the promotion",
+                        "promotion_description": "Description of the promotion",
+                        "promotion_id": "ID of the promotion to update",
+                        "promotion_name": "Name of the promotion",
+                        "promotion_scope": "Scope of the promotion",
+                        "promotion_type": "Type of the promotion",
+                        "promotion_value": "Value associated with the promotion",
+                        "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                        "modified_by": "ID of the user modifying the promotion",
+                    },
+                },
             }
-        }), status.HTTP_200_OK
+        ),
+        status.HTTP_200_OK,
     )
 
 
@@ -119,8 +116,9 @@ def update(promotion_id):
     promotion = Promotion.find(promotion_id)
     if not promotion:
 
-        abort_with_error(status.HTTP_404_NOT_FOUND,
-                         f"Promotion with id: {promotion_id} not found")
+        abort_with_error(
+            status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+        )
     request_json = request.get_json()
     promotion = promotion.deserialize(request_json)
     promotion.update()
@@ -150,11 +148,8 @@ def delete(promotion_id):
     """Deletes a Promotion with promotion_id with the fields included in the body of the request"""
     app.logger.info(f"Got request to delete Promotion with id: {promotion_id}")
     promotion = Promotion.find(promotion_id)
-    if not promotion:
-        abort_with_error(
-            status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
-        )
-    promotion.delete()
+    if promotion:
+        promotion.delete()
     return jsonify({}), status.HTTP_204_NO_CONTENT
 
 
@@ -165,7 +160,10 @@ def read_all():
     """
     app.logger.info("Request to Retrieve all promotions")
     promotions = Promotion.all()
-    return jsonify([promotion.serialize() for promotion in promotions]), status.HTTP_200_OK
+    return (
+        jsonify([promotion.serialize() for promotion in promotions]),
+        status.HTTP_200_OK,
+    )
 
 
 ######################################################################
