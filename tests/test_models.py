@@ -234,7 +234,6 @@ class Promotions(TestCase):
         updated_promotion = Promotion.find(test_promotion.promotion_id)
         self.assertNotEqual(updated_promotion.promotion_name, "Updated Name")
 
-
     def test_delete_promotion(self):
         """It should delete an existing promotion"""
         test_promotion = PromotionFactory()

@@ -145,7 +145,6 @@ def read(promotion_id):
     return jsonify(promotion.serialize()), status.HTTP_200_OK
 
 
-
 @app.route("/promotions/<int:promotion_id>", methods=["DELETE"])
 def delete(promotion_id):
     """Deletes a Promotion with promotion_id with the fields included in the body of the request"""
@@ -157,7 +156,7 @@ def delete(promotion_id):
         )
     promotion.delete()
     return jsonify({}), status.HTTP_204_NO_CONTENT
-    
+
 
 @app.route("/promotions", methods=["GET"])
 def read_all():
@@ -167,7 +166,6 @@ def read_all():
     app.logger.info("Request to Retrieve all promotions")
     promotions = Promotion.all()
     return jsonify([promotion.serialize() for promotion in promotions]), status.HTTP_200_OK
-
 
 
 ######################################################################
