@@ -190,6 +190,13 @@ class Promotions(TestCase):
         finally:
             promotion.deserialize_with_default = original_deserialize_with_default
 
+    def test_create_missing_data(self):
+        """It should throw a validation error since required fields are empty"""
+        test_promotion = Promotion()
+        test_promotion.name = "Name"
+
+        self.assertRaises(DataValidationError, test_promotion.create)
+
     def test_create_promotion(self):
         """It should create a Promotion"""
         test_promotion = PromotionFactory()
@@ -233,3 +240,32 @@ class Promotions(TestCase):
         db.session.expire_all()
         updated_promotion = Promotion.find(test_promotion.promotion_id)
         self.assertNotEqual(updated_promotion.promotion_name, "Updated Name")
+
+    def test_delete_promotion(self):
+        """It should delete an existing promotion"""
+        test_promotion = PromotionFactory()
+        test_promotion.create()
+        test_promotion.delete()
+        db.session.expire_all()
+        deleted_promotion = Promotion.find(test_promotion.promotion_id)
+        self.assertIsNone(deleted_promotion)
+
+    def test_delete_invalid_promotion(self):
+        """It should throw a DataValidationError"""
+        test_promotion = PromotionFactory()
+        test_promotion.start_date = "RandomStartDate"
+        self.assertRaises(DataValidationError, test_promotion.delete)
+        deleted_promotion = Promotion.find(test_promotion.promotion_id)
+        self.assertIsNone(deleted_promotion)
+
+    def test_read_by_name(self):
+        """ It should get only promotions which have the name provided"""
+        test_promotion = PromotionFactory()
+        test_promotion.promotion_name = "abcde_Promotion"
+        test_promotion.create()
+        test_promotion_2 = PromotionFactory()
+        test_promotion_2.promotion_name = "abcde_Promotion 2"
+        test_promotion_2.create()
+        db.session.expire_all()
+        found_promotion = Promotion.find_by_name(test_promotion.promotion_name).all()
+        self.assertEqual(len(found_promotion), 1)

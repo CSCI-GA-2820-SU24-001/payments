@@ -62,18 +62,18 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
     # Table Schema
     ##################################################
     promotion_id = db.Column(db.Integer, primary_key=True)
-    promotion_name = db.Column(db.String(63))
-    promotion_description = db.Column(db.String(255))
-    promotion_type = db.Column(db.Enum(PromotionType))
-    promotion_scope = db.Column(db.Enum(PromotionScope))
-    start_date = db.Column(db.DateTime)
-    end_date = db.Column(db.DateTime)
-    promotion_value = db.Column(db.Double)
+    promotion_name = db.Column(db.String(63), nullable=False)
+    promotion_description = db.Column(db.String(255), nullable=False)
+    promotion_type = db.Column(db.Enum(PromotionType), nullable=False)
+    promotion_scope = db.Column(db.Enum(PromotionScope), nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    promotion_value = db.Column(db.Double, nullable=False)
     promotion_code = db.Column(db.String(63), nullable=True)
-    created_by = db.Column(db.Uuid)
+    created_by = db.Column(db.Uuid, nullable=False)
     modified_by = db.Column(db.Uuid, nullable=True)
-    created_when = db.Column(db.DateTime)
-    modified_when = db.Column(db.DateTime)
+    created_when = db.Column(db.DateTime, nullable=False)
+    modified_when = db.Column(db.DateTime, nullable=True)
 
     def __repr__(self):
         return f"<Promotion {self.promotion_name} promotion_id=[{self.promotion_id}], promotion_name=[{self.promotion_name}]>"
@@ -170,6 +170,8 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             _type_: _description_
         """
         if key not in data:
+            return default
+        if data[key] is None:
             return default
         if deserializer is not None:
             return deserializer(data[key])
@@ -273,4 +275,4 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             name (string): the name of the YourResourceModels you want to match
         """
         logger.info("Processing name query for %s ...", name)
-        return cls.query.filter(cls.name == name)
+        return cls.query.filter(cls.promotion_name == name)
