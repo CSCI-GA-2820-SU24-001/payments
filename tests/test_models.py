@@ -233,3 +233,15 @@ class Promotions(TestCase):
         db.session.expire_all()
         updated_promotion = Promotion.find(test_promotion.promotion_id)
         self.assertNotEqual(updated_promotion.promotion_name, "Updated Name")
+
+    def test_read_by_name(self):
+        """ It should get only promotions which have the name provided"""
+        test_promotion = PromotionFactory()
+        test_promotion.promotion_name = "abcde_Promotion"
+        test_promotion.create()
+        test_promotion_2 = PromotionFactory()
+        test_promotion_2.promotion_name = "abcde_Promotion 2"
+        test_promotion_2.create()
+        db.session.expire_all()
+        found_promotion = Promotion.find_by_name(test_promotion.promotion_name).all()
+        self.assertEqual(len(found_promotion), 1)

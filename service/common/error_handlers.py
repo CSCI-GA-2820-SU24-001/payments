@@ -31,6 +31,12 @@ def request_validation_error(error):
     return bad_request(error)
 
 
+@app.errorhandler(Exception)
+def request_generic_error(error):
+    """Handles Value Errors from bad data"""
+    return internal_server_error(error)
+
+
 @app.errorhandler(status.HTTP_400_BAD_REQUEST)
 def bad_request(error):
     """Handles bad requests with 400_BAD_REQUEST"""

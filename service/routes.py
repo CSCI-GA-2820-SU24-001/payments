@@ -50,7 +50,6 @@ def create_promotion():
     This endpoint will create a Promotion based on the data in the body that is posted
     """
     app.logger.info("Request to create a Promotion")
-    check_content_type("application/json")
     data = request.get_json()
     promotion = Promotion()
     try:
@@ -61,7 +60,7 @@ def create_promotion():
         return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     except DataValidationError as error:
         abort(status.HTTP_400_BAD_REQUEST, str(error))
-    except Exception as error:
+    except Exception as error:  # pylint: disable=broad-except
         app.logger.error("Unexpected error: %s", error)
         abort(status.HTTP_500_INTERNAL_SERVER_ERROR, "Internal Server Error")
 
@@ -74,15 +73,10 @@ def update(promotion_id):
     if not promotion:
         abort_with_error(status.HTTP_404_NOT_FOUND,
                          f"Promotion with id: {promotion_id} not found")
-    try:
-        request_json = request.get_json()
-        promotion = promotion.deserialize(request_json)
-        promotion.update()
-        return jsonify(promotion.serialize())
-    except DataValidationError as error:
-        return abort_with_error(status.HTTP_400_BAD_REQUEST, f"Bad Request: {error}")
-    except Exception as error:  # pylint: disable=broad-except
-        return abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
+    request_json = request.get_json()
+    promotion = promotion.deserialize(request_json)
+    promotion.update()
+    return jsonify(promotion.serialize())
 
 
 @app.route("/promotions/<int:promotion_id>", methods=["GET"])
@@ -96,6 +90,17 @@ def read(promotion_id):
         abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
     app.logger.info("Returning promotion: %s", promotion.promotion_name)
     return jsonify(promotion.serialize()), status.HTTP_200_OK
+
+
+@app.route("/promotions", methods=["GET"])
+def read_all():
+    """
+    Read details of specific promotion id
+    """
+    app.logger.info("Request to Retrieve all promotions")
+    promotions = Promotion.all()
+    return jsonify([promotion.serialize() for promotion in promotions]), status.HTTP_200_OK
+
 
 ######################################################################
 #  U T I L  F U N C T I O N S
@@ -111,10 +116,3 @@ def abort_with_error(error_code, error_msg):
     """
     app.logger.error(error_msg)
     abort(error_code, error_msg)
-
-
-def check_content_type(content_type):
-    """Checks that the media type is correct"""
-    if request.headers["Content-Type"] != content_type:
-        app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
-        abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, f"Content-Type must be {content_type}")
