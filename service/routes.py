@@ -93,9 +93,6 @@ def create_promotion():
     This endpoint will create a Promotion based on the data in the body that is posted
     """
     app.logger.info("Request to create a Promotion")
-    if request.content_type != "application/json":
-        app.logger.error("Invalid Content-Type: ", {request.content_type})
-        abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, description="Content-Type must be application/json")
     data = request.get_json()
     promotion = Promotion()
     promotion.deserialize(data)
