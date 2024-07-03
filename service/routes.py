@@ -32,7 +32,7 @@ from service.common import status  # HTTP Status Codes
 ######################################################################
 @app.route("/")
 def index():
-    """ Root URL response """
+    """Root URL response"""
     return (
         "Reminder: return some useful information in json format about the service here",
         status.HTTP_200_OK,
@@ -42,6 +42,7 @@ def index():
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
+
 
 @app.route("/promotions/create", methods=["POST"])
 def create_promotion():
@@ -57,7 +58,9 @@ def create_promotion():
         promotion.deserialize(data)
         promotion.create()
         message = promotion.serialize()
-        location_url = url_for("get_promotion", promotion_id=promotion.promotion_id, _external=True)
+        location_url = url_for(
+            "get_promotion", promotion_id=promotion.promotion_id, _external=True
+        )
         return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     except DataValidationError as error:
         abort(status.HTTP_400_BAD_REQUEST, str(error))
@@ -72,8 +75,9 @@ def update(promotion_id):
     app.logger.info(f"Got request to update Promotion with id: {promotion_id}")
     promotion = Promotion.find(promotion_id)
     if not promotion:
-        abort_with_error(status.HTTP_404_NOT_FOUND,
-                         f"Promotion with id: {promotion_id} not found")
+        abort_with_error(
+            status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+        )
     try:
         request_json = request.get_json()
         promotion = promotion.deserialize(request_json)
@@ -82,7 +86,9 @@ def update(promotion_id):
     except DataValidationError as error:
         return abort_with_error(status.HTTP_400_BAD_REQUEST, f"Bad Request: {error}")
     except Exception as error:  # pylint: disable=broad-except
-        return abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
+        return abort_with_error(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}"
+        )
 
 
 @app.route("/promotions/<int:promotion_id>", methods=["GET"])
@@ -90,10 +96,15 @@ def read(promotion_id):
     """
     Read details of specific promotion id
     """
-    app.logger.info("Request to Retrieve a promotion with promotion id [%s]", promotion_id)
+    app.logger.info(
+        "Request to Retrieve a promotion with promotion id [%s]", promotion_id
+    )
     promotion = Promotion.find(promotion_id)
     if not promotion:
-        abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Promotion with id '{promotion_id}' was not found.",
+        )
     app.logger.info("Returning promotion: %s", promotion.promotion_name)
     return jsonify(promotion.serialize()), status.HTTP_200_OK
 
@@ -104,13 +115,15 @@ def delete(promotion_id):
     app.logger.info(f"Got request to delete Promotion with id: {promotion_id}")
     promotion = Promotion.find(promotion_id)
     if not promotion:
-        abort_with_error(status.HTTP_404_NOT_FOUND,
-                         f"Promotion with id: {promotion_id} not found")
-    try:
-        promotion.delete()
-        return jsonify({}), status.HTTP_200_OK
-    except Exception as error:  # pylint: disable=broad-except
-        return abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
+        abort_with_error(
+            status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+        )
+    # try:
+    promotion.delete()
+    return jsonify({}), status.HTTP_204_NO_CONTENT
+    # except Exception as error:  # pylint: disable=broad-except
+    #     return abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
+
 
 ######################################################################
 #  U T I L  F U N C T I O N S
@@ -132,4 +145,7 @@ def check_content_type(content_type):
     """Checks that the media type is correct"""
     if request.headers["Content-Type"] != content_type:
         app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
-        abort(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, f"Content-Type must be {content_type}")
+        abort(
+            status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            f"Content-Type must be {content_type}",
+        )
