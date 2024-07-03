@@ -288,4 +288,4 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             name (string): the name of the YourResourceModels you want to match
         """
         logger.info("Processing name query for %s ...", name)
-        return cls.query.filter(cls.name == name)
+        return cls.query.filter(cls.promotion_name == name)

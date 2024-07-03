@@ -5,10 +5,10 @@ TestYourResourceModel API Service Test Suite
 import os
 import logging
 from unittest import TestCase
-from unittest.mock import patch
+from uuid import UUID
 from wsgi import app
 from service.common import status
-from service.common.datetime_utils import datetime_from_str
+from service.common.datetime_utils import datetime_from_str, datetime_to_str
 from service.models import db, Promotion, PromotionScope
 from tests.factories import PromotionFactory
 
@@ -136,6 +136,17 @@ class TestYourResourceService(TestCase):
             response_json["promotion_scope"], new_promotion_data["promotion_scope"]
         )
 
+    def test_update_with_invalid_content_type(self):
+        """It should return a 415 Invalid content type response"""
+        existing_promotion = PromotionFactory()
+        existing_promotion.create()
+
+        resp = self.client.put(
+            f"/promotions/{existing_promotion.promotion_id}",
+            data="12345",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
     def test_update_with_invalid_promotion_id(self):
         """It should not update any model and return a 404 not found when an invalid_promotion_id is supplied"""
         existing_promotion = PromotionFactory()
@@ -174,7 +185,7 @@ class TestYourResourceService(TestCase):
         self.assertNotEqual(updated_promotion.promotion_name, new_promotion_data["promotion_name"])
 
     def test_update_with_unknown_exception(self):
-        """It should not update model and return a 400 not found when invalid data is supplied"""
+        """It should not update model and return a 500 when an unknown error occurs"""
         existing_promotion = PromotionFactory()
         existing_promotion.create()
 
@@ -199,3 +210,67 @@ class TestYourResourceService(TestCase):
             self.assertNotEqual(saved_promotion.promotion_name, new_promotion_data["promotion_name"])
         finally:
             existing_promotion.update = original_update
+
+    def test_get_promotion(self):
+        """It should Get a single Promotion"""
+        existing_promotion = PromotionFactory()
+        existing_promotion.create()
+        response = self.client.get(f"/promotions/{existing_promotion.promotion_id}",)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(data["promotion_name"], existing_promotion.promotion_name)
+        self.assertEqual(data["promotion_description"], existing_promotion.promotion_description)
+        self.assertEqual(data["promotion_type"], existing_promotion.promotion_type.name)
+        self.assertEqual(data["promotion_scope"], existing_promotion.promotion_scope.name)
+        self.assertEqual(data["start_date"], datetime_to_str(existing_promotion.start_date))
+        self.assertEqual(data["end_date"], datetime_to_str(existing_promotion.end_date))
+        self.assertEqual(data["promotion_value"], existing_promotion.promotion_value)
+        self.assertEqual(data["promotion_code"], existing_promotion.promotion_code)
+        self.assertEqual(UUID(data["created_by"]), existing_promotion.created_by)
+        self.assertEqual(UUID(data["modified_by"]), existing_promotion.modified_by)
+        self.assertEqual(data["created_when"], datetime_to_str(existing_promotion.created_when))
+        self.assertEqual(data["modified_when"], existing_promotion.modified_when)
+
+    def test_get_promotion_not_found(self):
+        """It should not Get a Promotion thats not found"""
+        existing_promotion = PromotionFactory()
+        existing_promotion.create()
+        response = self.client.get("/promotions/1234567",)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_list_all_promotions(self):
+        """ It should return all promotions in the database """
+        promotion_1 = PromotionFactory()
+        promotion_2 = PromotionFactory()
+        promotion_1.create()
+        promotion_2.create()
+        response = self.client.get("/promotions")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 2)
+
+    def test_list_all_promotions_with_wrong_method(self):
+        """It should return all promotions in the database"""
+        promotion_1 = PromotionFactory()
+        promotion_2 = PromotionFactory()
+        promotion_1.create()
+        promotion_2.create()
+        response = self.client.put("/promotions")
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_list_all_promotions_with_validation_error(self):
+        """It should return a 500 Internal Server Error"""
+        promotion_1 = PromotionFactory()
+        promotion_2 = PromotionFactory()
+        promotion_1.create()
+        promotion_2.create()
+
+        original_all = Promotion.all
+        try:
+            def mock_all():
+                raise ConnectionError
+            Promotion.all = mock_all
+            response = self.client.get("/promotions")
+            self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        finally:
+            Promotion.all = original_all

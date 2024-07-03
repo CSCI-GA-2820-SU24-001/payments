@@ -34,8 +34,52 @@ from service.common import status  # HTTP Status Codes
 def index():
     """ Root URL response """
     return (
-        "Reminder: return some useful information in json format about the service here",
-        status.HTTP_200_OK,
+        jsonify({
+            "DELETE /promotions/{promotion_id}": {
+                "description": "Deletes a specific promotion by ID",
+                "params": {
+                    "promotion_id": "ID of the promotion to delete"
+                }
+            },
+            "GET /promotions": {
+                "description": "Retrieves all promotions"
+            },
+            "GET /promotions/{promotion_id}": {
+                "description": "Retrieves a specific promotion by ID",
+                "params": {
+                    "promotion_id": "ID of the promotion to retrieve"
+                }
+            },
+            "POST /promotions/create": {
+                "description": "Creates a new promotion",
+                "params": {
+                    "end_date": "End date of the promotion in YYYY-MM-DD format",
+                    "promotion_code": "Unique code for the promotion",
+                    "promotion_description": "Description of the promotion",
+                    "promotion_name": "Name of the promotion",
+                    "promotion_scope": "Scope of the promotion",
+                    "promotion_type": "Type of the promotion",
+                    "promotion_value": "Value associated with the promotion",
+                    "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                    "created_by": "ID of the user creating the promotion"
+                }
+            },
+            "PUT /promotions/{promotion_id}": {
+                "description": "Updates a specific promotion",
+                "params": {
+                    "end_date": "End date of the promotion in YYYY-MM-DD format",
+                    "promotion_code": "Unique code for the promotion",
+                    "promotion_description": "Description of the promotion",
+                    "promotion_id": "ID of the promotion to update",
+                    "promotion_name": "Name of the promotion",
+                    "promotion_scope": "Scope of the promotion",
+                    "promotion_type": "Type of the promotion",
+                    "promotion_value": "Value associated with the promotion",
+                    "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                    "modified_by": "ID of the user modifying the promotion"
+                }
+            }
+        }), status.HTTP_200_OK
     )
 
 
@@ -73,15 +117,34 @@ def update(promotion_id):
     if not promotion:
         abort_with_error(status.HTTP_404_NOT_FOUND,
                          f"Promotion with id: {promotion_id} not found")
-    try:
-        request_json = request.get_json()
-        promotion = promotion.deserialize(request_json)
-        promotion.update()
-        return jsonify(promotion.serialize())
-    except DataValidationError as error:
-        return abort_with_error(status.HTTP_400_BAD_REQUEST, f"Bad Request: {error}")
-    except Exception as error:  # pylint: disable=broad-except
-        return abort_with_error(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred : {error}")
+    request_json = request.get_json()
+    promotion = promotion.deserialize(request_json)
+    promotion.update()
+    return jsonify(promotion.serialize())
+
+
+@app.route("/promotions/<int:promotion_id>", methods=["GET"])
+def read(promotion_id):
+    """
+    Read details of specific promotion id
+    """
+    app.logger.info("Request to Retrieve a promotion with promotion id [%s]", promotion_id)
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
+    app.logger.info("Returning promotion: %s", promotion.promotion_name)
+    return jsonify(promotion.serialize()), status.HTTP_200_OK
+
+
+@app.route("/promotions", methods=["GET"])
+def read_all():
+    """
+    Read details of specific promotion id
+    """
+    app.logger.info("Request to Retrieve all promotions")
+    promotions = Promotion.all()
+    return jsonify([promotion.serialize() for promotion in promotions]), status.HTTP_200_OK
+
 
 ######################################################################
 #  U T I L  F U N C T I O N S
