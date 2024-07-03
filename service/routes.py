@@ -34,8 +34,52 @@ from service.common import status  # HTTP Status Codes
 def index():
     """ Root URL response """
     return (
-        "Reminder: return some useful information in json format about the service here",
-        status.HTTP_200_OK,
+        jsonify({
+            "DELETE /promotions/{promotion_id}": {
+                "description": "Deletes a specific promotion by ID",
+                "params": {
+                    "promotion_id": "ID of the promotion to delete"
+                }
+            },
+            "GET /promotions": {
+                "description": "Retrieves all promotions"
+            },
+            "GET /promotions/{promotion_id}": {
+                "description": "Retrieves a specific promotion by ID",
+                "params": {
+                    "promotion_id": "ID of the promotion to retrieve"
+                }
+            },
+            "POST /promotions/create": {
+                "description": "Creates a new promotion",
+                "params": {
+                    "end_date": "End date of the promotion in YYYY-MM-DD format",
+                    "promotion_code": "Unique code for the promotion",
+                    "promotion_description": "Description of the promotion",
+                    "promotion_name": "Name of the promotion",
+                    "promotion_scope": "Scope of the promotion",
+                    "promotion_type": "Type of the promotion",
+                    "promotion_value": "Value associated with the promotion",
+                    "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                    "created_by": "ID of the user creating the promotion"
+                }
+            },
+            "PUT /promotions/{promotion_id}": {
+                "description": "Updates a specific promotion",
+                "params": {
+                    "end_date": "End date of the promotion in YYYY-MM-DD format",
+                    "promotion_code": "Unique code for the promotion",
+                    "promotion_description": "Description of the promotion",
+                    "promotion_id": "ID of the promotion to update",
+                    "promotion_name": "Name of the promotion",
+                    "promotion_scope": "Scope of the promotion",
+                    "promotion_type": "Type of the promotion",
+                    "promotion_value": "Value associated with the promotion",
+                    "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                    "modified_by": "ID of the user modifying the promotion"
+                }
+            }
+        }), status.HTTP_200_OK
     )
 
 
