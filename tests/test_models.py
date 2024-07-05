@@ -8,7 +8,13 @@ import uuid
 from datetime import datetime
 from unittest import TestCase
 from wsgi import app
-from service.models import Promotion, DataValidationError, PromotionScope, PromotionType, db
+from service.models import (
+    Promotion,
+    DataValidationError,
+    PromotionScope,
+    PromotionType,
+    db,
+)
 from service.common.datetime_utils import datetime_to_str
 from .factories import PromotionFactory
 
@@ -54,7 +60,7 @@ class Promotions(TestCase):
     ######################################################################
 
     def test_serialize_promotion(self):
-        """ It should deserialize a Promotion into a dict"""
+        """It should deserialize a Promotion into a dict"""
         test_promotion = PromotionFactory()
         serialized = test_promotion.serialize()
         assert serialized["promotion_id"] == test_promotion.promotion_id
@@ -67,7 +73,9 @@ class Promotions(TestCase):
         assert serialized["promotion_code"] == test_promotion.promotion_code
         assert serialized["created_by"] == test_promotion.created_by
         assert serialized["modified_by"] == test_promotion.modified_by
-        assert serialized["created_when"] == datetime_to_str(test_promotion.created_when)
+        assert serialized["created_when"] == datetime_to_str(
+            test_promotion.created_when
+        )
         assert serialized["modified_when"] is None
 
     def test_serialize_promotion_2(self):
@@ -90,7 +98,7 @@ class Promotions(TestCase):
         assert serialized["modified_when"] is None
 
     def test_serialized_promotion_with_missing_fields(self):
-        """ It should deserialize a Promotion into a dict with some fields as None"""
+        """It should deserialize a Promotion into a dict with some fields as None"""
         test_promotion = PromotionFactory()
         test_promotion.promotion_name = None
         test_promotion.modified_when = None
@@ -135,7 +143,7 @@ class Promotions(TestCase):
         assert result.modified_when == datetime(2021, 1, 1, 0, 0)
 
     def test_deserialize_invalid_promotion(self):
-        """ It should throw an exception for any invalid formats """
+        """It should throw an exception for any invalid formats"""
         invalid_json_type = {
             "promotion_id": 123,
             "promotion_name": "abcPromotion",
@@ -153,11 +161,13 @@ class Promotions(TestCase):
             "promotion_name": "abcPromotion",
             "promotion_description": "abcPromotionDescription",
             "promotion_scope": "SOME UNKNOWN",
-            "start_date": "abc123"
+            "start_date": "abc123",
         }
         promotion = Promotion()
         self.assertRaises(DataValidationError, promotion.deserialize, invalid_json_type)
-        self.assertRaises(DataValidationError, promotion.deserialize, invalid_json_scope)
+        self.assertRaises(
+            DataValidationError, promotion.deserialize, invalid_json_scope
+        )
         self.assertRaises(DataValidationError, promotion.deserialize, invalid_json_date)
         assert promotion.promotion_name is None
         assert promotion.promotion_description is None
@@ -166,29 +176,30 @@ class Promotions(TestCase):
 
     def test_deserialize_with_errors(self):
         """It should raise a DataValidationError"""
-        promotion_json = {
-            "promotion_id": 123,
-            "promotion_name": "abcPromotion"
-        }
+        promotion_json = {"promotion_id": 123, "promotion_name": "abcPromotion"}
         promotion = Promotion()
-        original_deserialize_with_default = promotion.deserialize_with_default
+        original_deserialize_with_default = Promotion.deserialize_with_default
         try:
             # Type Error
             def type_error_deserialize(key, data, default, deserializer=None):
                 raise TypeError("Some bad type")
-            promotion.deserialize_with_default = type_error_deserialize
-            self.assertRaises(DataValidationError, promotion.deserialize, promotion_json)
+
+            Promotion.deserialize_with_default = type_error_deserialize
+            self.assertRaises(
+                DataValidationError, promotion.deserialize, promotion_json
+            )
 
             # Attribute Error
             def attribute_error_deserialize(key, data, default, deserializer=None):
                 raise AttributeError("Some bad attribute")
+
             promotion.deserialize_with_default = attribute_error_deserialize
             self.assertRaises(
                 DataValidationError, promotion.deserialize, promotion_json
             )
 
         finally:
-            promotion.deserialize_with_default = original_deserialize_with_default
+            Promotion.deserialize_with_default = original_deserialize_with_default
 
     def test_create_missing_data(self):
         """It should throw a validation error since required fields are empty"""
@@ -230,7 +241,7 @@ class Promotions(TestCase):
         assert updated_promotion.promotion_name == "Updated Name"
 
     def test_update_invalid_promotion(self):
-        """ It should not update promotion and raise DataValidationError"""
+        """It should not update promotion and raise DataValidationError"""
         test_promotion = PromotionFactory()
         test_promotion.create()
         test_promotion.start_date = "InvalidDateFormat"
@@ -259,7 +270,7 @@ class Promotions(TestCase):
         self.assertIsNone(deleted_promotion)
 
     def test_read_by_name(self):
-        """ It should get only promotions which have the name provided"""
+        """It should get only promotions which have the name provided"""
         test_promotion = PromotionFactory()
         test_promotion.promotion_name = "abcde_Promotion"
         test_promotion.create()
@@ -269,3 +280,101 @@ class Promotions(TestCase):
         db.session.expire_all()
         found_promotion = Promotion.find_by_name(test_promotion.promotion_name).all()
         self.assertEqual(len(found_promotion), 1)
+
+    def test_find_by_date(self):
+        """It should return all promotions valid on a specific date"""
+        promotion1 = PromotionFactory()
+        promotion1.start_date = datetime(2025, 1, 1)
+        promotion1.end_date = datetime(2026, 1, 1)
+
+        promotion2 = PromotionFactory()
+        promotion2.start_date = datetime(2024, 1, 1)
+        promotion2.end_date = datetime(2025, 3, 1)
+
+        promotion3 = PromotionFactory()
+        promotion3.start_date = datetime(2025, 1, 1)
+        promotion3.end_date = datetime(2025, 6, 1)
+        promotion1.create()
+        promotion2.create()
+        promotion3.create()
+        results = Promotion.filter_by_datetime(
+            datetime(2025, 6, 1), query=db.session.query(Promotion)
+        ).all()
+        self.assertEqual(len(results), 2)
+
+    def test_find_by_scope(self):
+        """It should return all promotions with the indicated scopes"""
+        promotion1 = PromotionFactory()
+        promotion1.promotion_scope = PromotionScope.PRODUCT_ID
+        promotion1.create()
+
+        promotion2 = PromotionFactory()
+        promotion2.promotion_scope = PromotionScope.ENTIRE_STORE
+        promotion2.create()
+
+        promotion3 = PromotionFactory()
+        promotion3.promotion_scope = PromotionScope.PRODUCT_CATEGORY
+        promotion3.create()
+
+        results = Promotion.filter_by_promotion_scope(
+            [PromotionScope.ENTIRE_STORE, PromotionScope.PRODUCT_CATEGORY],
+            query=db.session.query(Promotion),
+        ).all()
+        self.assertEqual(len(results), 2)
+
+    def test_find_by_type(self):
+        """It should return all promotions with the indicated types"""
+        promotion1 = PromotionFactory()
+        promotion1.promotion_type = PromotionType.ABSOLUTE
+        promotion1.create()
+
+        promotion2 = PromotionFactory()
+        promotion2.promotion_type = PromotionType.ABSOLUTE
+        promotion2.create()
+
+        promotion3 = PromotionFactory()
+        promotion3.promotion_type = PromotionType.PERCENTAGE
+        promotion3.create()
+
+        results = Promotion.filter_by_promotion_type(
+            [PromotionType.ABSOLUTE], query=db.session.query(Promotion)
+        ).all()
+        self.assertEqual(len(results), 2)
+
+    def test_find_by_filters(self):
+        """It should return all promotions which match the required filters"""
+        # Promotion meets criteria
+        promotion1 = PromotionFactory()
+        promotion1.start_date = datetime(2025, 1, 1)
+        promotion1.end_date = datetime(2026, 1, 1)
+        promotion1.promotion_scope = PromotionScope.ENTIRE_STORE
+        promotion1.create()
+        # Promotion meets scope criteria but not date criteria
+        promotion2 = PromotionFactory()
+        promotion2.start_date = datetime(2024, 1, 1)
+        promotion2.end_date = datetime(2025, 3, 1)
+        promotion2.promotion_scope = PromotionScope.ENTIRE_STORE
+        promotion2.create()
+        # Promotion meets date criteria but not scope criteria
+        promotion3 = PromotionFactory()
+        promotion3.start_date = datetime(2025, 1, 1)
+        promotion3.end_date = datetime(2026, 1, 1)
+        promotion3.promotion_scope = PromotionScope.PRODUCT_CATEGORY
+        promotion3.create()
+        # Promotion meets date criteria and second scope criteria
+        promotion4 = PromotionFactory()
+        promotion4.start_date = datetime(2025, 1, 1)
+        promotion4.end_date = datetime(2026, 1, 1)
+        promotion4.promotion_scope = PromotionScope.PRODUCT_ID
+        promotion4.create()
+
+        test_filters = {
+            "datetime": "2025-06-01",
+            "promotion_scope": ["ENTIRE_STORE", "PRODUCT_ID"],
+        }
+        results = Promotion.find_with_filters(test_filters).all()
+        result_ids = [result.promotion_id for result in results]
+
+        self.assertEqual(len(results), 2)
+        self.assertIn(promotion1.promotion_id, result_ids)
+        self.assertIn(promotion4.promotion_id, result_ids)

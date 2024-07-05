@@ -98,9 +98,7 @@ def create_promotion():
     promotion.deserialize(data)
     promotion.create()
     message = promotion.serialize()
-    location_url = url_for(
-        "read", promotion_id=promotion.promotion_id, _external=True
-    )
+    location_url = url_for("read", promotion_id=promotion.promotion_id, _external=True)
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
 
@@ -154,10 +152,11 @@ def delete(promotion_id):
 @app.route("/promotions", methods=["GET"])
 def read_all():
     """
-    Read details of specific promotion id
+    Read details of all promotions matching searach criteria
     """
     app.logger.info("Request to Retrieve all promotions")
-    promotions = Promotion.all()
+    filters = request.args
+    promotions = Promotion.find_with_filters(filters).all()
     return (
         jsonify([promotion.serialize() for promotion in promotions]),
         status.HTTP_200_OK,

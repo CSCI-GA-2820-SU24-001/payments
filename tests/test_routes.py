@@ -63,7 +63,9 @@ class TestYourResourceService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         new_promotion = response.get_json()
         self.assertEqual(new_promotion["promotion_name"], promotion.promotion_name)
-        self.assertEqual(new_promotion["promotion_scope"], promotion.promotion_scope.name)
+        self.assertEqual(
+            new_promotion["promotion_scope"], promotion.promotion_scope.name
+        )
         self.assertEqual(new_promotion["promotion_type"], promotion.promotion_type.name)
         self.assertEqual(new_promotion["promotion_value"], promotion.promotion_value)
 
@@ -87,7 +89,7 @@ class TestYourResourceService(TestCase):
         """Test creating a Promotion for data validation error"""
         promotion = PromotionFactory()
         new_promotion = promotion.serialize()
-        new_promotion['modified_when'] = 'testInvalid'
+        new_promotion["modified_when"] = "testInvalid"
         response = self.client.post(
             "/promotions", json=new_promotion, content_type="application/json"
         )
@@ -109,10 +111,14 @@ class TestYourResourceService(TestCase):
             Promotion.create = mock_create_with_exception
 
             response = self.client.post(
-                "/promotions", json=promotion.serialize(), content_type="application/json"
+                "/promotions",
+                json=promotion.serialize(),
+                content_type="application/json",
             )
 
-            self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            self.assertEqual(
+                response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         finally:
             # Restore the original method
             Promotion.create = original_create
@@ -343,16 +349,16 @@ class TestYourResourceService(TestCase):
         promotion_1.create()
         promotion_2.create()
 
-        original_all = Promotion.all
+        original_find = Promotion.find_with_filters
         try:
 
             def mock_all():
                 raise ConnectionError
 
-            Promotion.all = mock_all
+            Promotion.find_with_filters = mock_all
             response = self.client.get("/promotions")
             self.assertEqual(
                 response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         finally:
-            Promotion.all = original_all
+            Promotion.find_with_filters = original_find

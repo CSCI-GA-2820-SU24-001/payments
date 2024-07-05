@@ -7,8 +7,10 @@ All of the models are stored in this module
 import logging
 import enum
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_
 
 from service.common.datetime_utils import datetime_from_str, datetime_to_str
+
 logger = logging.getLogger("flask.app")
 
 # Create the SQLAlchemy object to be initialized later in init_db()
@@ -27,7 +29,7 @@ class PromotionType(enum.Enum):
 
     @classmethod
     def deserialize(cls, promotion_type_str: str):
-        """ Convert promotion_type_str into a PromotionType or None"""
+        """Convert promotion_type_str into a PromotionType or None"""
         try:
             return PromotionType[promotion_type_str]
         except KeyError as error:
@@ -58,6 +60,7 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
     """
     Class that represents a YourResourceModel
     """
+
     ##################################################
     # Table Schema
     ##################################################
@@ -131,51 +134,9 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             "modified_by": self.modified_by,
             "created_when": datetime_to_str(self.created_when),
             "modified_when": (
-                datetime_to_str(self.modified_when)
-                if self.modified_when
-                else None
+                datetime_to_str(self.modified_when) if self.modified_when else None
             ),
         }
-
-    def deserialize_datetime(self, datetime_str: str):
-        """
-        Deserialize a datetime from a datetime string
-        Args:
-            datetime_str: A string representing the date
-        """
-        try:
-            return datetime_from_str(datetime_str)
-        except ValueError as error:
-            raise DataValidationError(
-                f"Invalid date format: {datetime_str} does not conform to any valid datetime format"
-            ) from error
-
-    def deserialize_with_default(
-        self,
-        key,
-        data,
-        default,
-        deserializer=None,
-    ):
-        """Deserializes a field with a provided key from incoming json with a default value.
-        Uses provided deserializer if provided
-
-        Args:
-            key (string): The string to extract from the data
-            data (dict): The JSON object containing the incoming data
-            default (Any): the default to use if no data is found
-            deserializer (function, optional): Provided deserializer. Defaults to None.
-
-        Returns:
-            _type_: _description_
-        """
-        if key not in data:
-            return default
-        if data[key] is None:
-            return default
-        if deserializer is not None:
-            return deserializer(data[key])
-        return data[key]
 
     def deserialize(self, data):
         """
@@ -185,47 +146,52 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
         """
         try:
             updated_promotion = Promotion()
-            updated_promotion.promotion_id = self.deserialize_with_default(
+            updated_promotion.promotion_id = Promotion.deserialize_with_default(
                 "promotion_id", data, self.promotion_id
             )
-            updated_promotion.promotion_name = self.deserialize_with_default(
+            updated_promotion.promotion_name = Promotion.deserialize_with_default(
                 "promotion_name", data, self.promotion_name
             )
-            updated_promotion.promotion_description = self.deserialize_with_default(
-                "promotion_description", data, self.promotion_description
+            updated_promotion.promotion_description = (
+                Promotion.deserialize_with_default(
+                    "promotion_description", data, self.promotion_description
+                )
             )
-            updated_promotion.promotion_type = self.deserialize_with_default(
+            updated_promotion.promotion_type = Promotion.deserialize_with_default(
                 "promotion_type", data, self.promotion_type, PromotionType.deserialize
             )
-            updated_promotion.promotion_scope = self.deserialize_with_default(
+            updated_promotion.promotion_scope = Promotion.deserialize_with_default(
                 "promotion_scope",
                 data,
                 self.promotion_scope,
                 PromotionScope.deserialize,
             )
-            updated_promotion.start_date = self.deserialize_with_default(
-                "start_date", data, self.start_date, self.deserialize_datetime
+            updated_promotion.start_date = Promotion.deserialize_with_default(
+                "start_date", data, self.start_date, Promotion.deserialize_datetime
             )
-            updated_promotion.end_date = self.deserialize_with_default(
-                "end_date", data, self.end_date, self.deserialize_datetime
+            updated_promotion.end_date = Promotion.deserialize_with_default(
+                "end_date", data, self.end_date, Promotion.deserialize_datetime
             )
-            updated_promotion.promotion_value = self.deserialize_with_default(
+            updated_promotion.promotion_value = Promotion.deserialize_with_default(
                 "promotion_value", data, self.promotion_value
             )
-            updated_promotion.promotion_code = self.deserialize_with_default(
+            updated_promotion.promotion_code = Promotion.deserialize_with_default(
                 "promotion_code", data, self.promotion_code
             )
-            updated_promotion.created_by = self.deserialize_with_default(
+            updated_promotion.created_by = Promotion.deserialize_with_default(
                 "created_by", data, self.created_by
             )
-            updated_promotion.modified_by = self.deserialize_with_default(
+            updated_promotion.modified_by = Promotion.deserialize_with_default(
                 "modified_by", data, self.modified_by
             )
-            updated_promotion.created_when = self.deserialize_with_default(
-                "created_when", data, self.created_when, self.deserialize_datetime
+            updated_promotion.created_when = Promotion.deserialize_with_default(
+                "created_when", data, self.created_when, Promotion.deserialize_datetime
             )
-            updated_promotion.modified_when = self.deserialize_with_default(
-                "modified_when", data, self.modified_when, self.deserialize_datetime
+            updated_promotion.modified_when = Promotion.deserialize_with_default(
+                "modified_when",
+                data,
+                self.modified_when,
+                Promotion.deserialize_datetime,
             )
             # Only update once all fields have been verified and deserialized
             self.promotion_id = updated_promotion.promotion_id
@@ -268,11 +234,104 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
         return cls.query.session.get(cls, by_id)
 
     @classmethod
-    def find_by_name(cls, name):
-        """Returns all YourResourceModels with the given name
+    def find_with_filters(cls, filters):
+        """Finds all Promotions by applying filters from a dict"""
+        datetime_filter = Promotion.deserialize_with_default(
+            "datetime", filters, None, Promotion.deserialize_datetime
+        )
+        promotion_types_filter = Promotion.deserialize_with_default(
+            "promotion_type",
+            filters,
+            None,
+            Promotion.to_list_deserializer(PromotionType.deserialize),
+        )
+        promotion_scopes_filter = Promotion.deserialize_with_default(
+            "promotion_scope",
+            filters,
+            None,
+            Promotion.to_list_deserializer(PromotionScope.deserialize),
+        )
+        query = db.session.query(Promotion)
+        if datetime_filter is not None:
+            query = Promotion.filter_by_datetime(datetime_filter, query)
+        if promotion_types_filter is not None:
+            query = Promotion.filter_by_promotion_type(promotion_types_filter, query)
+        if promotion_scopes_filter is not None:
+            query = Promotion.filter_by_promotion_scope(promotion_scopes_filter, query)
+
+        return query
+
+    @classmethod
+    def filter_by_datetime(cls, datetime, query):
+        """Returns all promotions which are valid at the specified datetime
 
         Args:
-            name (string): the name of the YourResourceModels you want to match
+            datetime (_type_): datetime where promotion should be valid
+        """
+        return query.filter(and_(cls.start_date <= datetime, cls.end_date >= datetime))
+
+    @classmethod
+    def filter_by_promotion_type(cls, promotion_types, query):
+        """Returns all promotions which have the specified type
+
+        Args:
+            promotion_type (PromotionType): promotion type to match
+        """
+        return query.filter(cls.promotion_type.in_(promotion_types))
+
+    @classmethod
+    def filter_by_promotion_scope(cls, promotion_scopes, query):
+        """Returns all promotions which have the specified scope
+
+        Args:
+            promotion_scope (PromotionScope): promotion scope to match
+        """
+        return query.filter(cls.promotion_scope.in_(promotion_scopes))
+
+    @classmethod
+    def find_by_name(cls, name):
+        """Returns all Promotions with the given name
+
+        Args:
+            name (string): the name of the Promotions you want to match
         """
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.promotion_name == name)
+
+    @classmethod
+    def deserialize_with_default(cls, key, data, default, deserializer=None):
+        """Deserializes a field with a provided key from incoming json with a default value.
+        Uses provided deserializer if provided
+
+        Args:
+            key (string): The string to extract from the data
+            data (dict): The JSON object containing the incoming data
+            default (Any): the default to use if no data is found
+            deserializer (function, optional): Provided deserializer. Defaults to None.
+        """
+        if not data.get(key, None):
+            return default
+        if deserializer is not None:
+            return deserializer(data.get(key))
+        return data.get(key)
+
+    @classmethod
+    def deserialize_datetime(cls, datetime_str: str):
+        """
+        Deserialize a datetime from a datetime string
+        Args:
+            datetime_str: A string representing the date
+        """
+        try:
+            return datetime_from_str(datetime_str)
+        except ValueError as error:
+            raise DataValidationError(
+                f"Invalid date format: {datetime_str} does not conform to any valid datetime format"
+            ) from error
+
+    @classmethod
+    def to_list_deserializer(cls, deserializer):
+        def deserialize_list(ls):
+            return [deserializer(item) for item in ls]
+
+        return deserialize_list
