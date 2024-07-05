@@ -366,6 +366,7 @@ class Promotions(TestCase):
         promotion4.start_date = datetime(2025, 1, 1)
         promotion4.end_date = datetime(2026, 1, 1)
         promotion4.promotion_scope = PromotionScope.PRODUCT_ID
+        promotion4.promotion_type = PromotionType.PERCENTAGE
         promotion4.create()
 
         test_filters = {
@@ -378,3 +379,9 @@ class Promotions(TestCase):
         self.assertEqual(len(results), 2)
         self.assertIn(promotion1.promotion_id, result_ids)
         self.assertIn(promotion4.promotion_id, result_ids)
+
+        test_filters2 = {"promotion_type": ["ABSOLUTE"]}
+        results2 = Promotion.find_with_filters(test_filters2).all()
+        result_ids2 = [result.promotion_id for result in results2]
+        self.assertEqual(len(results2), 3)
+        self.assertNotIn(promotion4.promotion_id, result_ids2)

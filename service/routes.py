@@ -152,10 +152,17 @@ def delete(promotion_id):
 @app.route("/promotions", methods=["GET"])
 def read_all():
     """
-    Read details of all promotions matching searach criteria
+    Read details of all promotions matching search criteria
     """
-    app.logger.info("Request to Retrieve all promotions")
-    filters = request.args
+    app.logger.info("Request to Retrieve all promotions with filters: {filters}")
+    filters = request.args.to_dict(flat=True)
+    to_list_query("promotion_scope", filters)
+    to_list_query("promotion_type", filters)
+    datetime = filters.get("datetime")
+    promotion_scopes = filters.get("promotion_scope")
+    promotion_types = filters.get("promotion_types")
+    print(datetime, promotion_scopes, promotion_types)
+
     promotions = Promotion.find_with_filters(filters).all()
     return (
         jsonify([promotion.serialize() for promotion in promotions]),
@@ -177,3 +184,8 @@ def abort_with_error(error_code, error_msg):
     """
     app.logger.error(error_msg)
     abort(error_code, error_msg)
+
+
+def to_list_query(key, data):
+    if key in data:
+        data[key] = str.split(data[key], ",")

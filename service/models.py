@@ -31,7 +31,7 @@ class PromotionType(enum.Enum):
     def deserialize(cls, promotion_type_str: str):
         """Convert promotion_type_str into a PromotionType or None"""
         try:
-            return PromotionType[promotion_type_str]
+            return PromotionType[promotion_type_str.upper()]
         except KeyError as error:
             raise DataValidationError(
                 f"Error: '{promotion_type_str}' is not a valid PromotionType"
@@ -49,7 +49,7 @@ class PromotionScope(enum.Enum):
     def deserialize(cls, promotion_scope_str: str):
         """Convert promotion_scope_str into a PromotionType or None"""
         try:
-            return PromotionScope[promotion_scope_str]
+            return PromotionScope[promotion_scope_str.upper()]
         except KeyError as error:
             raise DataValidationError(
                 f"Error: '{promotion_scope_str}' is not a valid PromotionType"
