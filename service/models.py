@@ -331,6 +331,8 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
 
     @classmethod
     def to_list_deserializer(cls, deserializer):
+        """Converts a deserialization function to an equivalent one for a list of the specified object"""
+
         def deserialize_list(ls):
             return [deserializer(item) for item in ls]
 

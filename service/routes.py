@@ -187,5 +187,11 @@ def abort_with_error(error_code, error_msg):
 
 
 def to_list_query(key, data):
+    """Converts a value in a dictionary to a list from a comma-separated string if it exists
+
+    Args:
+        key (str): the key to be converted
+        data (dict): the dict to convert it in
+    """
     if key in data:
         data[key] = str.split(data[key], ",")
