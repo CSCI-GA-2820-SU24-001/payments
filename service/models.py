@@ -222,6 +222,46 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
     ##################################################
 
     @classmethod
+    def deserialize_with_default(cls, key, data, default, deserializer=None):
+        """Deserializes a field with a provided key from incoming json with a default value.
+        Uses provided deserializer if provided
+
+        Args:
+            key (string): The string to extract from the data
+            data (dict): The JSON object containing the incoming data
+            default (Any): the default to use if no data is found
+            deserializer (function, optional): Provided deserializer. Defaults to None.
+        """
+        if not data.get(key, None):
+            return default
+        if deserializer is not None:
+            return deserializer(data.get(key))
+        return data.get(key)
+
+    @classmethod
+    def deserialize_datetime(cls, datetime_str: str):
+        """
+        Deserialize a datetime from a datetime string
+        Args:
+            datetime_str: A string representing the date
+        """
+        try:
+            return datetime_from_str(datetime_str)
+        except ValueError as error:
+            raise DataValidationError(
+                f"Invalid date format: {datetime_str} does not conform to any valid datetime format"
+            ) from error
+
+    @classmethod
+    def to_list_deserializer(cls, deserializer):
+        """Converts a deserialization function to an equivalent one for a list of the specified object"""
+
+        def deserialize_list(ls):
+            return [deserializer(item) for item in ls]
+
+        return deserialize_list
+
+    @classmethod
     def all(cls):
         """Returns all of the YourResourceModels in the database"""
         logger.info("Processing all YourResourceModels")
@@ -297,43 +337,3 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
         """
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.promotion_name == name)
-
-    @classmethod
-    def deserialize_with_default(cls, key, data, default, deserializer=None):
-        """Deserializes a field with a provided key from incoming json with a default value.
-        Uses provided deserializer if provided
-
-        Args:
-            key (string): The string to extract from the data
-            data (dict): The JSON object containing the incoming data
-            default (Any): the default to use if no data is found
-            deserializer (function, optional): Provided deserializer. Defaults to None.
-        """
-        if not data.get(key, None):
-            return default
-        if deserializer is not None:
-            return deserializer(data.get(key))
-        return data.get(key)
-
-    @classmethod
-    def deserialize_datetime(cls, datetime_str: str):
-        """
-        Deserialize a datetime from a datetime string
-        Args:
-            datetime_str: A string representing the date
-        """
-        try:
-            return datetime_from_str(datetime_str)
-        except ValueError as error:
-            raise DataValidationError(
-                f"Invalid date format: {datetime_str} does not conform to any valid datetime format"
-            ) from error
-
-    @classmethod
-    def to_list_deserializer(cls, deserializer):
-        """Converts a deserialization function to an equivalent one for a list of the specified object"""
-
-        def deserialize_list(ls):
-            return [deserializer(item) for item in ls]
-
-        return deserialize_list
