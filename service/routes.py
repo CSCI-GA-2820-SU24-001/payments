@@ -98,9 +98,7 @@ def create_promotion():
     promotion.deserialize(data)
     promotion.create()
     message = promotion.serialize()
-    location_url = url_for(
-        "read", promotion_id=promotion.promotion_id, _external=True
-    )
+    location_url = url_for("read", promotion_id=promotion.promotion_id, _external=True)
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
 
@@ -154,10 +152,18 @@ def delete(promotion_id):
 @app.route("/promotions", methods=["GET"])
 def read_all():
     """
-    Read details of specific promotion id
+    Read details of all promotions matching search criteria
     """
-    app.logger.info("Request to Retrieve all promotions")
-    promotions = Promotion.all()
+    app.logger.info("Request to Retrieve all promotions with filters: {filters}")
+    filters = request.args.to_dict(flat=True)
+    to_list_query("promotion_scope", filters)
+    to_list_query("promotion_type", filters)
+    datetime = filters.get("datetime")
+    promotion_scopes = filters.get("promotion_scope")
+    promotion_types = filters.get("promotion_types")
+    print(datetime, promotion_scopes, promotion_types)
+
+    promotions = Promotion.find_with_filters(filters).all()
     return (
         jsonify([promotion.serialize() for promotion in promotions]),
         status.HTTP_200_OK,
@@ -178,3 +184,14 @@ def abort_with_error(error_code, error_msg):
     """
     app.logger.error(error_msg)
     abort(error_code, error_msg)
+
+
+def to_list_query(key, data):
+    """Converts a value in a dictionary to a list from a comma-separated string if it exists
+
+    Args:
+        key (str): the key to be converted
+        data (dict): the dict to convert it in
+    """
+    if key in data:
+        data[key] = str.split(data[key], ",")

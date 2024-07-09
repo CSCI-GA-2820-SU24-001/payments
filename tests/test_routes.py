@@ -6,11 +6,13 @@ import os
 import logging
 from unittest import TestCase
 from uuid import UUID
+from datetime import datetime
 from wsgi import app
 from service.common import status
 from service.common.datetime_utils import datetime_from_str, datetime_to_str
 from service.models import db, Promotion, PromotionScope
 from tests.factories import PromotionFactory
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -63,7 +65,9 @@ class TestYourResourceService(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         new_promotion = response.get_json()
         self.assertEqual(new_promotion["promotion_name"], promotion.promotion_name)
-        self.assertEqual(new_promotion["promotion_scope"], promotion.promotion_scope.name)
+        self.assertEqual(
+            new_promotion["promotion_scope"], promotion.promotion_scope.name
+        )
         self.assertEqual(new_promotion["promotion_type"], promotion.promotion_type.name)
         self.assertEqual(new_promotion["promotion_value"], promotion.promotion_value)
 
@@ -87,7 +91,7 @@ class TestYourResourceService(TestCase):
         """Test creating a Promotion for data validation error"""
         promotion = PromotionFactory()
         new_promotion = promotion.serialize()
-        new_promotion['modified_when'] = 'testInvalid'
+        new_promotion["modified_when"] = "testInvalid"
         response = self.client.post(
             "/promotions", json=new_promotion, content_type="application/json"
         )
@@ -109,10 +113,14 @@ class TestYourResourceService(TestCase):
             Promotion.create = mock_create_with_exception
 
             response = self.client.post(
-                "/promotions", json=promotion.serialize(), content_type="application/json"
+                "/promotions",
+                json=promotion.serialize(),
+                content_type="application/json",
             )
 
-            self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            self.assertEqual(
+                response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         finally:
             # Restore the original method
             Promotion.create = original_create
@@ -316,7 +324,7 @@ class TestYourResourceService(TestCase):
         finally:
             existing_promotion.delete = original_delete
 
-    def test_list_all_promotions(self):
+    def test_list_all_promotions_no_filter(self):
         """It should return all promotions in the database"""
         promotion_1 = PromotionFactory()
         promotion_2 = PromotionFactory()
@@ -327,6 +335,43 @@ class TestYourResourceService(TestCase):
         data = response.get_json()
         self.assertEqual(len(data), 2)
 
+    def test_list_all_promotions_with_filter(self):
+        """It should return all promotions in the database which meet the specified criteria"""
+        promotion1 = PromotionFactory()
+        promotion1.start_date = datetime(2025, 1, 1)
+        promotion1.end_date = datetime(2026, 1, 1)
+        promotion1.promotion_scope = PromotionScope.ENTIRE_STORE
+        promotion1.create()
+        # Promotion meets scope criteria but not date criteria
+        promotion2 = PromotionFactory()
+        promotion2.start_date = datetime(2024, 1, 1)
+        promotion2.end_date = datetime(2025, 3, 1)
+        promotion2.promotion_scope = PromotionScope.ENTIRE_STORE
+        promotion2.create()
+        # Promotion meets date criteria but not scope criteria
+        promotion3 = PromotionFactory()
+        promotion3.start_date = datetime(2025, 1, 1)
+        promotion3.end_date = datetime(2026, 1, 1)
+        promotion3.promotion_scope = PromotionScope.PRODUCT_CATEGORY
+        promotion3.create()
+        # Promotion meets date criteria and second scope criteria
+        promotion4 = PromotionFactory()
+        promotion4.start_date = datetime(2025, 1, 1)
+        promotion4.end_date = datetime(2026, 1, 1)
+        promotion4.promotion_scope = PromotionScope.PRODUCT_ID
+        promotion4.create()
+        response = self.client.get(
+            "/promotions?promotion_scope=product_id,entire_store&datetime=2025-06-01"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 2)
+
+    def test_list_all_promotions_with_bad_query(self):
+        """It should return a 400 Bad Request response"""
+        response = self.client.get("/promotions?datetime=2025-06-900")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_list_all_promotions_with_wrong_method(self):
         """It should return all promotions in the database"""
         promotion_1 = PromotionFactory()
@@ -336,23 +381,23 @@ class TestYourResourceService(TestCase):
         response = self.client.put("/promotions")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def test_list_all_promotions_with_validation_error(self):
+    def test_list_all_promotions_with_connection_error(self):
         """It should return a 500 Internal Server Error"""
         promotion_1 = PromotionFactory()
         promotion_2 = PromotionFactory()
         promotion_1.create()
         promotion_2.create()
 
-        original_all = Promotion.all
+        original_find = Promotion.find_with_filters
         try:
 
             def mock_all():
                 raise ConnectionError
 
-            Promotion.all = mock_all
+            Promotion.find_with_filters = mock_all
             response = self.client.get("/promotions")
             self.assertEqual(
                 response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         finally:
-            Promotion.all = original_all
+            Promotion.find_with_filters = original_find
