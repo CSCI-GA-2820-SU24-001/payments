@@ -77,6 +77,7 @@ class Promotions(TestCase):
             test_promotion.created_when
         )
         assert serialized["modified_when"] is None
+        assert serialized["active"] == test_promotion.active
 
     def test_serialize_promotion_2(self):
         """It should deserialize a Promotion into a dict"""
@@ -96,6 +97,7 @@ class Promotions(TestCase):
             test_promotion.created_when
         )
         assert serialized["modified_when"] is None
+        assert serialized["active"] == test_promotion.active
 
     def test_serialized_promotion_with_missing_fields(self):
         """It should deserialize a Promotion into a dict with some fields as None"""
@@ -125,6 +127,7 @@ class Promotions(TestCase):
             "modified_by": default_uuid,
             "created_when": "2021-01-01",
             "modified_when": "2021-01-01",
+            "active": True,
         }
         promotion = Promotion()
         result = promotion.deserialize(promotion_json)
@@ -141,6 +144,7 @@ class Promotions(TestCase):
         assert result.modified_by == default_uuid
         assert result.created_when == datetime(2021, 1, 1, 0, 0)
         assert result.modified_when == datetime(2021, 1, 1, 0, 0)
+        assert result.active
 
     def test_deserialize_invalid_promotion(self):
         """It should throw an exception for any invalid formats"""

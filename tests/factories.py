@@ -29,3 +29,4 @@ class PromotionFactory(factory.Factory):
     modified_by = uuid.uuid4()
     created_when = datetime.datetime(2024, 1, 1, 0, 0)
     modified_when = None
+    active = False

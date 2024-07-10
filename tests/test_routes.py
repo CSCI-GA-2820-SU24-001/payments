@@ -401,3 +401,23 @@ class TestYourResourceService(TestCase):
             )
         finally:
             Promotion.find_with_filters = original_find
+
+    def test_activate_with_invalid_promotion_id(self):
+        """It should not activate any promotions and return a 404 not found when an invalid_promotion_id is supplied"""
+        existing_promotion = PromotionFactory()
+        existing_promotion.create()
+        resp = self.client.put(f"/promotions/activate/{1234567}")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        db.session.expire_all()
+        activated_promotion = Promotion.find(existing_promotion.promotion_id)
+        self.assertNotEqual(activated_promotion.active, True)
+
+    def test_activate_with_valid_promotion_id(self):
+        """It should switch the activate column of promotions with valid_promotion_id to True"""
+        existing_promotion = PromotionFactory()
+        existing_promotion.create()
+        resp = self.client.put(f"/promotions/activate/{existing_promotion.promotion_id}")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        db.session.expire_all()
+        activated_promotion = Promotion.find(existing_promotion.promotion_id)
+        assert activated_promotion.active
