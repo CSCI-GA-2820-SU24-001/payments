@@ -75,6 +75,12 @@ def index():
                         "modified_by": "ID of the user modifying the promotion",
                     },
                 },
+                "PUT /promotions/activate/{promotion_id}": {
+                    "description": "Activate a specific promotion",
+                    "params": {
+                        "promotion_id": "ID of the promotion to activate",
+                    },
+                },
             }
         ),
         status.HTTP_200_OK,
@@ -168,6 +174,20 @@ def read_all():
         jsonify([promotion.serialize() for promotion in promotions]),
         status.HTTP_200_OK,
     )
+
+
+@app.route("/promotions/activate/<int:promotion_id>", methods=["PUT"])
+def activate(promotion_id):
+    """Activates a Promotion with promotion_id"""
+    app.logger.info(f"Got request to activate Promotion with id: {promotion_id}")
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort_with_error(
+            status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+        )
+    promotion.active = True
+    promotion.update()
+    return jsonify(promotion.serialize())
 
 
 ######################################################################

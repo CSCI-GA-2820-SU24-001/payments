@@ -77,6 +77,7 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
     modified_by = db.Column(db.Uuid, nullable=True)
     created_when = db.Column(db.DateTime, nullable=False)
     modified_when = db.Column(db.DateTime, nullable=True)
+    active = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
         return f"<Promotion {self.promotion_name} promotion_id=[{self.promotion_id}], promotion_name=[{self.promotion_name}]>"
@@ -136,6 +137,7 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             "modified_when": (
                 datetime_to_str(self.modified_when) if self.modified_when else None
             ),
+            "active": self.active,
         }
 
     def deserialize(self, data):
@@ -193,6 +195,9 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
                 self.modified_when,
                 Promotion.deserialize_datetime,
             )
+            updated_promotion.active = Promotion.deserialize_with_default(
+                "active", data, self.active
+            )
             # Only update once all fields have been verified and deserialized
             self.promotion_id = updated_promotion.promotion_id
             self.promotion_name = updated_promotion.promotion_name
@@ -207,6 +212,7 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             self.modified_by = updated_promotion.modified_by
             self.created_when = updated_promotion.created_when
             self.modified_when = updated_promotion.modified_when
+            self.active = updated_promotion.active
 
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error
