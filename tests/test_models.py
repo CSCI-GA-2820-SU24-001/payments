@@ -23,10 +23,10 @@ DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
 
+
 ######################################################################
 #  Promotions   M O D E L   T E S T   C A S E S
 ######################################################################
-
 # pylint: disable=too-many-public-methods,duplicate-code
 class Promotions(TestCase):
     """Test Cases for Promotion Model"""
