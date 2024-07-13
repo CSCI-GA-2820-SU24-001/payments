@@ -3,6 +3,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Language-Python-blue.svg)](https://python.org/)
 ![Workflow](https://github.com/CSCI-GA-2820-SU24-001/promotions/actions/workflows/workflow.yml/badge.svg)
+![Codecov](https://codecov.io/github/CSCI-GA-2820-SU24-001/promotions/graph/badge.svg?)
 
 ## Overview
 
