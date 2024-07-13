@@ -5,7 +5,7 @@ name: Lint and Test
 
 on:
   push:
-    branches: [$default_branch]
+    branches: [master]
   pull_request:
 
 permissions:
