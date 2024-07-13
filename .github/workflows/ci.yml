@@ -81,7 +81,8 @@ jobs:
       - name: Run unit tests with PyTest
         run: pytest --pspec --cov=service --cov-fail-under=95
         env:
-          DATABASE_URI: "redis://redis:6379"
+          DATABASE_URI: "sqlite:///test.db"
+          REDIS_URL: "redis://redis:6379"
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3.1.4
