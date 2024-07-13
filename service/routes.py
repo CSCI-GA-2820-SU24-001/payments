@@ -21,19 +21,68 @@ This service implements a REST API that allows you to Create, Read, Update
 and Delete Pets from the inventory of pets in the PetShop
 """
 
+from flask import request, abort, jsonify, url_for
 from flask import current_app as app  # Import Flask application
 from service.models import Promotion
 from service.common import status  # HTTP Status Codes
 
-
 ######################################################################
 # GET INDEX
 ######################################################################
+
+
 @app.route("/")
 def index():
-    """ Root URL response """
+    """Root URL response"""
     return (
-        "Reminder: return some useful information in json format about the service here",
+        jsonify(
+            {
+                "DELETE /promotions/{promotion_id}": {
+                    "description": "Deletes a specific promotion by ID",
+                    "params": {"promotion_id": "ID of the promotion to delete"},
+                },
+                "GET /promotions": {"description": "Retrieves all promotions"},
+                "GET /promotions/{promotion_id}": {
+                    "description": "Retrieves a specific promotion by ID",
+                    "params": {"promotion_id": "ID of the promotion to retrieve"},
+                },
+                "POST /promotions/create": {
+                    "description": "Creates a new promotion",
+                    "params": {
+                        "end_date": "End date of the promotion in YYYY-MM-DD format",
+                        "promotion_code": "Unique code for the promotion",
+                        "promotion_description": "Description of the promotion",
+                        "promotion_name": "Name of the promotion",
+                        "promotion_scope": "Scope of the promotion",
+                        "promotion_type": "Type of the promotion",
+                        "promotion_value": "Value associated with the promotion",
+                        "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                        "created_by": "ID of the user creating the promotion",
+                    },
+                },
+                "PUT /promotions/{promotion_id}": {
+                    "description": "Updates a specific promotion",
+                    "params": {
+                        "end_date": "End date of the promotion in YYYY-MM-DD format",
+                        "promotion_code": "Unique code for the promotion",
+                        "promotion_description": "Description of the promotion",
+                        "promotion_id": "ID of the promotion to update",
+                        "promotion_name": "Name of the promotion",
+                        "promotion_scope": "Scope of the promotion",
+                        "promotion_type": "Type of the promotion",
+                        "promotion_value": "Value associated with the promotion",
+                        "start_date": "Start date of the promotion in YYYY-MM-DD format",
+                        "modified_by": "ID of the user modifying the promotion",
+                    },
+                },
+                "PUT /promotions/activate/{promotion_id}": {
+                    "description": "Activate a specific promotion",
+                    "params": {
+                        "promotion_id": "ID of the promotion to activate",
+                    },
+                },
+            }
+        ),
         status.HTTP_200_OK,
     )
 
@@ -42,4 +91,127 @@ def index():
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
 
-# Todo: Place your REST API code here ...
+
+@app.route("/promotions", methods=["POST"])
+def create_promotion():
+    """
+    Creates a new Promotion
+    This endpoint will create a Promotion based on the data in the body that is posted
+    """
+    app.logger.info("Request to create a Promotion")
+    data = request.get_json()
+    promotion = Promotion()
+    promotion.deserialize(data)
+    promotion.create()
+    message = promotion.serialize()
+    location_url = url_for("read", promotion_id=promotion.promotion_id, _external=True)
+    return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
+
+
+@app.route("/promotions/<int:promotion_id>", methods=["PUT"])
+def update(promotion_id):
+    """Updates a Promotion with promotion_id with the fields included in the body of the request"""
+    app.logger.info(f"Got request to update Promotion with id: {promotion_id}")
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+
+        abort_with_error(
+            status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+        )
+    request_json = request.get_json()
+    promotion = promotion.deserialize(request_json)
+    promotion.update()
+    return jsonify(promotion.serialize())
+
+
+@app.route("/promotions/<int:promotion_id>", methods=["GET"])
+def read(promotion_id):
+    """
+    Read details of specific promotion id
+    """
+    app.logger.info(
+        "Request to Retrieve a promotion with promotion id [%s]", promotion_id
+    )
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Promotion with id '{promotion_id}' was not found.",
+        )
+    app.logger.info("Returning promotion: %s", promotion.promotion_name)
+    return jsonify(promotion.serialize()), status.HTTP_200_OK
+
+
+@app.route("/promotions/<int:promotion_id>", methods=["DELETE"])
+def delete(promotion_id):
+    """Deletes a Promotion with promotion_id with the fields included in the body of the request"""
+    app.logger.info(f"Got request to delete Promotion with id: {promotion_id}")
+
+    promotion = Promotion.find(promotion_id)
+    if promotion:
+        promotion.delete()
+
+    app.logger.info(f"Promotion with id {promotion_id} delete complete.")
+    return jsonify({}), status.HTTP_204_NO_CONTENT
+
+
+@app.route("/promotions", methods=["GET"])
+def read_all():
+    """
+    Read details of all promotions matching search criteria
+    """
+    app.logger.info("Request to Retrieve all promotions with filters: {filters}")
+    filters = request.args.to_dict(flat=True)
+    to_list_query("promotion_scope", filters)
+    to_list_query("promotion_type", filters)
+    datetime = filters.get("datetime")
+    promotion_scopes = filters.get("promotion_scope")
+    promotion_types = filters.get("promotion_types")
+    print(datetime, promotion_scopes, promotion_types)
+
+    promotions = Promotion.find_with_filters(filters).all()
+    return (
+        jsonify([promotion.serialize() for promotion in promotions]),
+        status.HTTP_200_OK,
+    )
+
+
+@app.route("/promotions/activate/<int:promotion_id>", methods=["PUT"])
+def activate(promotion_id):
+    """Activates a Promotion with promotion_id"""
+    app.logger.info(f"Got request to activate Promotion with id: {promotion_id}")
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort_with_error(
+            status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+        )
+    promotion.active = True
+    promotion.update()
+    return jsonify(promotion.serialize())
+
+
+######################################################################
+#  U T I L  F U N C T I O N S
+######################################################################
+
+
+def abort_with_error(error_code, error_msg):
+    """Aborts a request with a specific error code and message
+
+    Args:
+        error_code (int): error code number
+        error_msg (str): description of the error
+    """
+    app.logger.error(error_msg)
+    abort(error_code, error_msg)
+
+
+def to_list_query(key, data):
+    """Converts a value in a dictionary to a list from a comma-separated string if it exists
+
+    Args:
+        key (str): the key to be converted
+        data (dict): the dict to convert it in
+    """
+    if key in data:
+        data[key] = str.split(data[key], ",")

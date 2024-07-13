@@ -2,6 +2,7 @@
 Test Factory to make fake objects for testing
 """
 import uuid
+import datetime
 
 import factory
 import factory.random
@@ -20,11 +21,12 @@ class PromotionFactory(factory.Factory):
     promotion_description = "a good promotion"
     promotion_type = PromotionType.ABSOLUTE
     promotion_scope = PromotionScope.PRODUCT_ID
-    start_date = "2025-01-01"
-    end_date = "2026-01-01"
+    start_date = datetime.datetime(2025, 1, 1, 0, 0)
+    end_date = datetime.datetime(2026, 1, 1, 0, 0)
     promotion_value = 50
     promotion_code = None
     created_by = uuid.uuid4()
     modified_by = uuid.uuid4()
-    created_when = "2024-01-01"
+    created_when = datetime.datetime(2024, 1, 1, 0, 0)
     modified_when = None
+    active = False
