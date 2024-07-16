@@ -425,3 +425,23 @@ class TestYourResourceService(TestCase):
         db.session.expire_all()
         activated_promotion = Promotion.find(existing_promotion.promotion_id)
         assert activated_promotion.active
+
+    def test_deactivate_with_invalid_promotion_id(self):
+        """It should not deactivate any promotions and return a 404 not found when an invalid_promotion_id is supplied"""
+        existing_promotion = PromotionFactory()
+        existing_promotion.create()
+        resp = self.client.put(f"/promotions/deactivate/{1234567}")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        db.session.expire_all()
+        deactivated_promotion = Promotion.find(existing_promotion.promotion_id)
+        self.assertNotEqual(deactivated_promotion.active, True)
+
+    def test_deactivate_with_valid_promotion_id(self):
+        """It should switch the deactivate column of promotions with valid_promotion_id to False"""
+        existing_promotion = PromotionFactory()
+        existing_promotion.create()
+        resp = self.client.put(f"/promotions/deactivate/{existing_promotion.promotion_id}")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        db.session.expire_all()
+        deactivated_promotion = Promotion.find(existing_promotion.promotion_id)
+        self.assertFalse(deactivated_promotion.active)
