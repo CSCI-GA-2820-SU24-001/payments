@@ -6,8 +6,11 @@ All of the models are stored in this module
 
 import logging
 import enum
+
+from datetime import datetime as dt
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_
+from sqlalchemy import and_, event
+
 
 from service.common.datetime_utils import datetime_from_str, datetime_to_str
 
@@ -75,8 +78,8 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
     promotion_code = db.Column(db.String(63), nullable=True)
     created_by = db.Column(db.Uuid, nullable=False)
     modified_by = db.Column(db.Uuid, nullable=True)
-    created_when = db.Column(db.DateTime, nullable=False)
-    modified_when = db.Column(db.DateTime, nullable=True)
+    created_when = db.Column(db.DateTime, nullable=False, default=dt.utcnow)
+    modified_when = db.Column(db.DateTime, nullable=True, default=dt.utcnow, onupdate=dt.utcnow)
     active = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
@@ -133,7 +136,9 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             "promotion_code": self.promotion_code,
             "created_by": self.created_by,
             "modified_by": self.modified_by,
-            "created_when": datetime_to_str(self.created_when),
+            "created_when": (
+                datetime_to_str(self.created_when) if self.created_when else None
+            ),
             "modified_when": (
                 datetime_to_str(self.modified_when) if self.modified_when else None
             ),
@@ -343,3 +348,18 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
         """
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.promotion_name == name)
+
+
+@event.listens_for(Promotion, 'before_insert')
+def before_insert(_, __, target):
+    """Set the created_when and modified_when fields to current UTC time before insert"""
+    now = dt.utcnow()
+    target.created_when = now
+    target.modified_when = now
+
+
+@event.listens_for(Promotion, 'before_update')
+def before_update(_, __, target):
+    """Set the modified_when field to current UTC time before update"""
+    now = dt.utcnow()
+    target.modified_when = now

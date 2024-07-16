@@ -271,10 +271,14 @@ class TestYourResourceService(TestCase):
         self.assertEqual(data["promotion_code"], existing_promotion.promotion_code)
         self.assertEqual(UUID(data["created_by"]), existing_promotion.created_by)
         self.assertEqual(UUID(data["modified_by"]), existing_promotion.modified_by)
-        self.assertEqual(
-            data["created_when"], datetime_to_str(existing_promotion.created_when)
-        )
-        self.assertEqual(data["modified_when"], existing_promotion.modified_when)
+
+        data_created_when = datetime.fromisoformat(data["created_when"])
+        data_modified_when = datetime.fromisoformat(data["modified_when"])
+        data_created_when_str = datetime_to_str(data_created_when)
+        data_modified_when_str = datetime_to_str(data_modified_when)
+
+        self.assertEqual(data_created_when_str, datetime_to_str(existing_promotion.created_when))
+        self.assertEqual(data_modified_when_str, datetime_to_str(existing_promotion.modified_when))
 
     def test_get_promotion_not_found(self):
         """It should not Get a Promotion thats not found"""
