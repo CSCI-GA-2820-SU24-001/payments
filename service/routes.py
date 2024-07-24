@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-Pet Store Service
+Promotion Store Service
 
 This service implements a REST API that allows you to Create, Read, Update
 and Delete Pets from the inventory of pets in the PetShop
@@ -34,57 +34,7 @@ from service.common import status  # HTTP Status Codes
 @app.route("/")
 def index():
     """Root URL response"""
-    return (
-        jsonify(
-            {
-                "DELETE /promotions/{promotion_id}": {
-                    "description": "Deletes a specific promotion by ID",
-                    "params": {"promotion_id": "ID of the promotion to delete"},
-                },
-                "GET /promotions": {"description": "Retrieves all promotions"},
-                "GET /promotions/{promotion_id}": {
-                    "description": "Retrieves a specific promotion by ID",
-                    "params": {"promotion_id": "ID of the promotion to retrieve"},
-                },
-                "POST /promotions/create": {
-                    "description": "Creates a new promotion",
-                    "params": {
-                        "end_date": "End date of the promotion in YYYY-MM-DD format",
-                        "promotion_code": "Unique code for the promotion",
-                        "promotion_description": "Description of the promotion",
-                        "promotion_name": "Name of the promotion",
-                        "promotion_scope": "Scope of the promotion",
-                        "promotion_type": "Type of the promotion",
-                        "promotion_value": "Value associated with the promotion",
-                        "start_date": "Start date of the promotion in YYYY-MM-DD format",
-                        "created_by": "ID of the user creating the promotion",
-                    },
-                },
-                "PUT /promotions/{promotion_id}": {
-                    "description": "Updates a specific promotion",
-                    "params": {
-                        "end_date": "End date of the promotion in YYYY-MM-DD format",
-                        "promotion_code": "Unique code for the promotion",
-                        "promotion_description": "Description of the promotion",
-                        "promotion_id": "ID of the promotion to update",
-                        "promotion_name": "Name of the promotion",
-                        "promotion_scope": "Scope of the promotion",
-                        "promotion_type": "Type of the promotion",
-                        "promotion_value": "Value associated with the promotion",
-                        "start_date": "Start date of the promotion in YYYY-MM-DD format",
-                        "modified_by": "ID of the user modifying the promotion",
-                    },
-                },
-                "PUT /promotions/activate/{promotion_id}": {
-                    "description": "Activate a specific promotion",
-                    "params": {
-                        "promotion_id": "ID of the promotion to activate",
-                    },
-                },
-            }
-        ),
-        status.HTTP_200_OK,
-    )
+    return app.send_static_file("index.html")
 
 
 ######################################################################
