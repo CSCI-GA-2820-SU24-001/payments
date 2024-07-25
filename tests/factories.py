@@ -27,5 +27,6 @@ class PromotionFactory(factory.Factory):
     promotion_code = None
     created_by = uuid.uuid4()
     modified_by = uuid.uuid4()
-    created_when = datetime.datetime(2024, 1, 1, 0, 0)
+    created_when = None
     modified_when = None
+    active = False
