@@ -27,8 +27,8 @@ def read_promotion_from_table(row):
         "promotion_type": row["Type"],
         "active": row["Active"].lower() == "true",
         "promotion_scope": row["Scope"],
-        "start_date": row["Start Date"],
-        "end_date": row["End Date"],
+        "start_date": datetime.isoformat(datetime.fromisoformat(row["Start Date"])),
+        "end_date": datetime.isoformat(datetime.fromisoformat(row["End Date"])),
         "created_by": row["Created By"],
         "modified_by": row["Modified By"],
         "created_when": row["Created When"],
@@ -115,7 +115,13 @@ def step_impl(context):
     WebDriverWait(context.driver, 3).until(
         expected_conditions.text_to_be_present_in_element_value((By.ID, "promotion_id"), expected_promotion_id)
     )
-    print(context.driver.page_source)
     expect_field_value(context, "promotion_id", expected_promotion_id)
     expect_field_value(context, "promotion_name", str(expected_promotion["promotion_name"]))
+    expect_field_value(context, "promotion_value", str(expected_promotion["promotion_value"]))
+    expect_field_value(context, "promotion_code", str(expected_promotion["promotion_code"]))
+    expect_field_value(context, "promotion_description", str(expected_promotion["promotion_description"]))
+    expect_field_value(context, "promotion_type", str(expected_promotion["promotion_type"]))
+    expect_field_value(context, "promotion_scope", str(expected_promotion["promotion_scope"]))
+    expect_field_value(context, "start_date", str(expected_promotion["start_date"]))
+    expect_field_value(context, "end_date", str(expected_promotion["end_date"]))
     assert True
