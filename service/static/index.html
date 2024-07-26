@@ -96,9 +96,9 @@
               <label class="control-label col-sm-2" for="promotion_scope">Scope:</label>
               <div class="col-sm-10">
                 <select class="form-control" id="promotion_scope">
-                  <option value="1" selected>PRODUCT_ID</option>
-                  <option value="2">PRODUCT_CATEGORY</option>
-                  <option value="3">ENTIRE_STORE</option>
+                  <option value="PRODUCT_ID" selected>PRODUCT_ID</option>
+                  <option value="PRODUCT_CATEGORY">PRODUCT_CATEGORY</option>
+                  <option value="ENTIRE_STORE">ENTIRE_STORE</option>
                 </select>
               </div>
             </div>
@@ -107,7 +107,7 @@
             <div class="form-group">
               <label class="control-label col-sm-2" for="start_date">Start Date:</label>
               <div class="col-sm-10">
-                <input type="date" class="form-control" id="start_date" placeholder="2020-04-01">
+                <input type="datetime" class="form-control" id="start_date" placeholder="2020-04-01T00:00:00">
               </div>
             </div>
 
@@ -115,7 +115,7 @@
             <div class="form-group">
               <label class="control-label col-sm-2" for="end_date">End Date:</label>
               <div class="col-sm-10">
-                <input type="date" class="form-control" id="end_date" placeholder="2020-04-01">
+                <input type="datetime" class="form-control" id="end_date" placeholder="2020-04-01T00:00:00">
               </div>
             </div>
 
