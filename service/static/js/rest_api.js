@@ -27,9 +27,14 @@ $(function () {
     function clear_form_data() {
         $("#promotion_name").val("");
         $("#promotion_type").val("");
-        $("#promotion_available").val("");
+        $("#promotion_code").val("");
+        $("#promotion_value").val("");
+        $("#promotion_type").val("");
+        $("#promotion_description").val("");
+        $("#promotion_active").val("");
         $("#promotion_scope").val("");
-        $("#promotion_date").val("");
+        $("#start_date").val("");
+        $("#end_date").val("");
     }
 
     // Updates the flash message area
