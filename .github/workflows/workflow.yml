@@ -66,6 +66,7 @@ jobs:
       run: |
         export FLASK_APP=service:app
         pytest --pspec --cov=service --cov-fail-under=95
+        behave
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3.1.4
       with:
