@@ -259,11 +259,6 @@ $(function () {
             table += '</tbody></table>';
             $("#search_results").append(table);
 
-            // copy the first result to the form
-            if (firstPromotion != "") {
-                update_form_data(firstPromotion)
-            }
-
             flash_message("Success")
         });
 
