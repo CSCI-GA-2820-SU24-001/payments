@@ -27,12 +27,16 @@ def read_promotion_from_table(row):
         "promotion_type": row["Type"],
         "active": row["Active"].lower() == "true",
         "promotion_scope": row["Scope"],
-        "start_date": datetime.isoformat(datetime.fromisoformat(row["Start Date"])),
-        "end_date": datetime.isoformat(datetime.fromisoformat(row["End Date"])),
+        "start_date": datetime.isoformat(
+            datetime.fromisoformat(row["Start Date"]), timespec="minutes"
+        ),
+        "end_date": datetime.isoformat(
+            datetime.fromisoformat(row["End Date"]), timespec="minutes"
+        ),
         "created_by": row["Created By"],
         "modified_by": row["Modified By"],
         "created_when": row["Created When"],
-        "modified_when": row["Modified When"]
+        "modified_when": row["Modified When"],
     }
     return promotion
 
@@ -62,7 +66,6 @@ def step_impl(context):
     for row in context.table:
         promotion = read_promotion_from_table(row)
         context.resp = requests.post(rest_endpoint, json=promotion, timeout=WAIT_TIMEOUT)
-        print(context.resp.text)
         expect(context.resp.status_code).equal_to(HTTP_201_CREATED)
         id = context.resp.json()["promotion_id"]
         promotions.append(id)
@@ -125,3 +128,23 @@ def step_impl(context):
     expect_field_value(context, "start_date", str(expected_promotion["start_date"]))
     expect_field_value(context, "end_date", str(expected_promotion["end_date"]))
     assert True
+
+@then('I should see names "{names}" in the search result table')
+def step_impl(context, names):
+    expected_names = names.split(",")
+    WebDriverWait(context.driver, 3).until(
+        expected_conditions.text_to_be_present_in_element((By.ID, "search_results"), expected_names[0])
+    )
+    search_results = context.driver.find_element(By.ID, "search_results")
+    print(search_results.text)
+    for name in expected_names:
+        assert name in search_results.text
+
+
+@then('I should not see names "{names}" in the search result table')
+def step_impl(context, names):
+    unexpected_names = names.split(",")
+    search_results = context.driver.find_element(By.ID, "search_results")
+    print(search_results.text)
+    for name in unexpected_names:
+        assert name not in search_results.text
