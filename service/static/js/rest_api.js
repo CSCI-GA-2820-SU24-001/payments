@@ -9,23 +9,32 @@ $(function () {
         $("#promotion_id").val(res.promotion_id);
         $("#promotion_name").val(res.promotion_name);
         $("#promotion_code").val(res.promotion_code);
+        $("#promotion_value").val(res.promotion_value);
+
         $("#promotion_type").val(res.promotion_type);
+        $("#promotion_description").val(res.promotion_description);
         if (res.active == true) {
             $("#promotion_available").val("true");
         } else {
             $("#promotion_available").val("false");
         }
         $("#promotion_scope").val(res.promotion_scope);
-        $("#promotion_date").val(res.date);
+        $("#start_date").val(res.start_date);
+        $("#end_date").val(res.end_date);
     }
 
     /// Clears all form fields
     function clear_form_data() {
         $("#promotion_name").val("");
         $("#promotion_type").val("");
-        $("#promotion_available").val("");
+        $("#promotion_code").val("");
+        $("#promotion_value").val("");
+        $("#promotion_type").val("");
+        $("#promotion_description").val("");
+        $("#promotion_active").val("");
         $("#promotion_scope").val("");
-        $("#promotion_date").val("");
+        $("#start_date").val("");
+        $("#end_date").val("");
     }
 
     // Updates the flash message area
