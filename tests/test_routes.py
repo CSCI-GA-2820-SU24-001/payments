@@ -15,7 +15,7 @@ from tests.factories import PromotionFactory
 
 
 DATABASE_URI = os.getenv(
-    "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
+    "DATABASE_URI", "postgresql+psycopg://postgres:postgres@postgres:5432/testdb"
 )
 
 
