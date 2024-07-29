@@ -66,9 +66,50 @@ jobs:
       run: |
         export FLASK_APP=service:app
         pytest --pspec --cov=service --cov-fail-under=95
+
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3.1.4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+  
+  Run_BDD_Tests:
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: pgs3cr3t
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    runs-on: ubuntu-latest
+    container: rofrano/pipeline-selenium:latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+    - name: Install dependencies
+      run: |
+        pip install poetry
+        poetry config virtualenvs.create false
+        poetry install
+    
+    - name: Start Services
+      run: |
+        gunicorn --log-level=info --bind=0.0.0.0:8080 wsgi:app &
+        echo "Waiting for service to start"
+        sleep 5
+      env:
+        DATABASE_URI: "postgresql+psycopg://postgres:pgs3cr3t@postgres:5432/testdb"
+        
+    - name: Run BDD Tests
+      run: behave
     
       
