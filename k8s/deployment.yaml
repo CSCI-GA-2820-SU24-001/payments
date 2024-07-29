@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: Promotion
+  name: promotion
   labels:
-    app: Promotion
+    app: promotion
 spec:
   replicas: 2
   strategy:
@@ -13,16 +13,16 @@ spec:
       maxUnavailable: 50%
   selector:
     matchLabels:
-      app: Promotion
+      app: promotion
   template:
     metadata:
       labels:
-        app: Promotion
+        app: promotion
     spec:
       restartPolicy: Always
       containers:
-      - name: Promotion
-        image: cluster-registry:5000/Promotion:1.0
+      - name: promotion
+        image: cluster-registry:5000/promotion:1.0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
