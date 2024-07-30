@@ -27,6 +27,14 @@ from service.models import Promotion
 from service.common import status  # HTTP Status Codes
 
 ######################################################################
+# GET HEALTH CHECK
+######################################################################
+@app.route("/health")
+def health_check():
+    """Let them know our heart is still beating"""
+    return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
+
+######################################################################
 # GET INDEX
 ######################################################################
 
@@ -35,6 +43,8 @@ from service.common import status  # HTTP Status Codes
 def index():
     """Root URL response"""
     return app.send_static_file("index.html")
+
+
 
 
 ######################################################################
