@@ -1,0 +1,12 @@
+/* Additional CSS */
+.form-group.d-flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.col-sm-3 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* This centers the content vertically if needed */
+}

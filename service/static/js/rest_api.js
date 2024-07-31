@@ -9,23 +9,32 @@ $(function () {
         $("#promotion_id").val(res.promotion_id);
         $("#promotion_name").val(res.promotion_name);
         $("#promotion_code").val(res.promotion_code);
+        $("#promotion_value").val(res.promotion_value);
+
         $("#promotion_type").val(res.promotion_type);
+        $("#promotion_description").val(res.promotion_description);
         if (res.active == true) {
             $("#promotion_available").val("true");
         } else {
             $("#promotion_available").val("false");
         }
         $("#promotion_scope").val(res.promotion_scope);
-        $("#promotion_date").val(res.date);
+        $("#start_date").val(res.start_date);
+        $("#end_date").val(res.end_date);
     }
 
     /// Clears all form fields
     function clear_form_data() {
         $("#promotion_name").val("");
         $("#promotion_type").val("");
-        $("#promotion_available").val("");
+        $("#promotion_code").val("");
+        $("#promotion_value").val("");
+        $("#promotion_type").val("");
+        $("#promotion_description").val("");
+        $("#promotion_active").val("");
         $("#promotion_scope").val("");
-        $("#promotion_date").val("");
+        $("#start_date").val("");
+        $("#end_date").val("");
     }
 
     // Updates the flash message area
@@ -188,29 +197,31 @@ $(function () {
 
     $("#search-btn").click(function () {
 
-        let name = $("#promotion_name").val();
-        let type = $("#promotion_type").val();
-        let active = $("#promotion_available").val() == "true";
+        let promotion_date = $("#search_promotion_date").val();
+        let promotion_types = $("#search_promotion_type").val().join(",");
+        let promotion_scopes = $("#search_promotion_scope").val().join(",");
 
         let queryString = ""
 
-        if (name) {
-            queryString += 'name=' + name
+        if (promotion_date) {
+            queryString += 'datetime=' + promotion_date
         }
-        if (type) {
+        if (promotion_types) {
             if (queryString.length > 0) {
-                queryString += '&type=' + type
+                queryString += '&promotion_type=' + promotion_types
             } else {
-                queryString += 'type=' + type
+                queryString += 'promotion_type=' + promotion_types
             }
         }
-        if (active) {
+        if (promotion_scopes) {
             if (queryString.length > 0) {
-                queryString += '&active=' + active
+                queryString += '&promotion_scope=' + promotion_scopes
             } else {
-                queryString += 'active=' + active
+                queryString += 'promotion_scope=' + promotion_scopes
             }
         }
+
+        console.log(queryString)
 
         $("#flash_message").empty();
 
@@ -228,26 +239,25 @@ $(function () {
             table += '<thead><tr>'
             table += '<th class="col-md-2">ID</th>'
             table += '<th class="col-md-2">Name</th>'
+            table += '<th class="col-md-2">Value</th>'
+            table += '<th class="col-md-2">Code</th>'
+            table += '<th class="col-md-2">Description</th>'
             table += '<th class="col-md-2">Type</th>'
-            table += '<th class="col-md-2">Active</th>'
             table += '<th class="col-md-2">Scope</th>'
-            table += '<th class="col-md-2">Date</th>'
+            table += '<th class="col-md-2">Active</th>'
+            table += '<th class="col-md-2">Start Date</th>'
+            table += '<th class="col-md-2">End Date</th>'
             table += '</tr></thead><tbody>'
             let firstPromotion = "";
             for(let i = 0; i < res.length; i++) {
                 let promotion = res[i];
-                table +=  `<tr id="row_${i}"><td>${promotion.id}</td><td>${promotion.name}</td><td>${promotion.type}</td><td>${promotion.active}</td><td>${promotion.scope}</td><td>${promotion.date}</td></tr>`;
+                table += `<tr id="row_${i}"><td>${promotion.promotion_id}</td><td>${promotion.promotion_name}</td><td>${promotion.promotion_value}</td><td>${promotion.promotion_code}</td><td>${promotion.promotion_description}</td><td>${promotion.promotion_type}</td><td>${promotion.promotion_scope}</td><td>${promotion.active}</td><td>${promotion.start_date}</td><td>${promotion.end_date}</td></tr>`;
                 if (i == 0) {
                     firstPromotion = promotion;
                 }
             }
             table += '</tbody></table>';
             $("#search_results").append(table);
-
-            // copy the first result to the form
-            if (firstPromotion != "") {
-                update_form_data(firstPromotion)
-            }
 
             flash_message("Success")
         });
