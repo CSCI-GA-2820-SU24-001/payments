@@ -50,24 +50,16 @@ $(function () {
 
         let name = $("#promotion_name").val();
         let type = $("#promotion_type").val();
-        let code = $("#promotion_code").val();
-        let value = $("#promotion_value").val();
-        let description = $("#promotion_description").val();
         let active = $("#promotion_available").val() == "true";
         let scope = $("#promotion_scope").val();
-        let start_date = $("#start_date").val();
-        let end_date = $("#end_date").val();
+        let date = $("#promotion_date").val();
 
         let data = {
-            "promotion_name": name,
-            "promotion_type": type,
-            "promotion_code": code,
-            "promotion_value": value,
-            "promotion_description": description,
+            "name": name,
+            "type": type,
             "active": active,
-            "promotion_scope": scope,
-            "start_date": start_date,
-            "end_date": end_date
+            "scope": scope,
+            "date": date
         };
 
         $("#flash_message").empty();
@@ -80,6 +72,7 @@ $(function () {
         });
 
         ajax.done(function(res){
+
             update_form_data(res)
             flash_message("Success")
         });
@@ -99,16 +92,24 @@ $(function () {
         let promotion_id = $("#promotion_id").val();
         let name = $("#promotion_name").val();
         let type = $("#promotion_type").val();
+        let code = $("#promotion_code").val();
+        let value = $("#promotion_value").val();
+        let description = $("#promotion_description").val();
         let active = $("#promotion_available").val() == "true";
         let scope = $("#promotion_scope").val();
-        let date = $("#promotion_date").val();
+        let start_date = $("#start_date").val();
+        let end_date = $("#end_date").val();
 
         let data = {
-            "name": name,
-            "type": type,
+            "promotion_name": name,
+            "promotion_type": type,
+            "promotion_code": code,
+            "promotion_value": value,
+            "promotion_description": description,
             "active": active,
-            "scope": scope,
-            "date": date
+            "promotion_scope": scope,
+            "start_date": start_date,
+            "end_date": end_date
         };
 
         $("#flash_message").empty();
