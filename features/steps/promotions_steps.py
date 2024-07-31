@@ -129,13 +129,15 @@ def expect_field_value(context, field_id, expected):
 @then("I should see the promotion details in the form")
 def step_impl(context):
     expected_promotion = read_promotion_from_table(context.table[0])
-    expected_promotion_name = str(expected_promotion["promotion_name"])
+    expected_promotion_id = to_actual_promotion_id(
+        context, expected_promotion["promotion_id"]
+    )
     WebDriverWait(context.driver, 3).until(
         expected_conditions.text_to_be_present_in_element_value(
-            (By.NAME, "promotion_name"), expected_promotion_name
+            (By.ID, "promotion_id"), expected_promotion_id
         )
     )
-    # expect_field_value(context, "promotion_id", expected_promotion_id)
+    expect_field_value(context, "promotion_id", expected_promotion_id)
     expect_field_value(
         context, "promotion_name", str(expected_promotion["promotion_name"])
     )
@@ -182,3 +184,12 @@ def step_impl(context, names):
     print(search_results.text)
     for name in unexpected_names:
         assert name not in search_results.text
+
+
+@then('I should see "{message}" after a while')
+def step_impl(context, message):
+    WebDriverWait(context.driver, 3).until(
+        expected_conditions.text_to_be_present_in_element(
+            (By.ID, "flash_message"), message
+        )
+    )

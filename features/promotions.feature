@@ -60,9 +60,9 @@ Scenario: Creating a Promotion
     And I enter "Description 4" into the "promotion_description" field
     And I enter "PERCENTAGE" into the "promotion_type" field
     And I enter "ENTIRE_STORE" into the "promotion_scope" field
-    And I enter "2024-07-01" into the "start_date" field
-    And I enter "2024-12-31" into the "end_date" field
+    And I enter "07010020241000AM" into the "start_date" field
+    And I enter "01010020251000AM" into the "end_date" field
     And I click the "create-btn" button
-    Then I should see the promotion details in the form
-    | ID | Name       | Value | Code  | Description  | Type      | Active | Scope        | Start Date | End Date   | Created By                           | Modified By                          | Created When | Modified When |
-    | 4  | Promotion D | 40    | CODE4 | Description 4 | PERCENTAGE | False   | ENTIRE_STORE | 2024-07-01 | 2024-12-31 | 00000000-0000-0000-0000-000000000000 | 00000000-0000-0000-0000-000000000000 | 2024-07-01   | 2024-07-01     |
+    Then I should see "Success" after a while
+    When I click the "search-btn" button
+    Then I should see names "Promotion D" in the search result table

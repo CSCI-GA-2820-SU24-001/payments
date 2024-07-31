@@ -67,7 +67,8 @@ $(function () {
             "active": active,
             "promotion_scope": scope,
             "start_date": start_date,
-            "end_date": end_date
+            "end_date": end_date,
+            "created_by": "00000000-0000-0000-0000-000000000000"
         };
 
         $("#flash_message").empty();
@@ -83,6 +84,8 @@ $(function () {
             update_form_data(res)
             flash_message("Success")
         });
+
+        
 
         ajax.fail(function(res){
             flash_message(res.responseJSON.message)
