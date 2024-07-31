@@ -38,3 +38,18 @@ Scenario: Querying promotions with filters
     And I click the "search-btn" button
     Then I should see names "Promotion B" in the search result table
     Then I should not see names "Promotion A, Promotion C" in the search result table
+
+Scenario: Updating a Promotion
+    When I visit the "Home Page"
+    And I look for test promotion id "2"
+    And I click the "retrieve-btn" button
+    And I clear the "promotion_name" field
+    And I enter "Promotion B Updated" into the "promotion_name" field
+    And i clear the "promotion_description" field
+    And I enter "An Updated Description" into the "promotion_description" field
+    And I click the "update-btn" button
+    Then I should see the promotion details in the form
+    | ID | Name        | Value | Code  | Description   | Type     | Active | Scope        | Start Date | End Date   | Created By                           | Modified By                          | Created When | Modified When |
+    | 2 | Promotion B Updated | 20 | CODE2 | An Updated Description | PERCENTAGE | False | PRODUCT_ID | 2024-06-01 | 2024-12-31 | 00000000-0000-0000-0000-000000000000 | 00000000-0000-0000-0000-000000000000 | 2024-01-01 | 2025-01-01 |
+
+
