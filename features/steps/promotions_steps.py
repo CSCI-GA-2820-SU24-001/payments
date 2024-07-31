@@ -91,6 +91,12 @@ def step_impl(context, test_promotion_id):
     field.send_keys(actual_promotion_id)
 
 
+@when('I clear the "{element_id}" field')
+def step_impl(context, element_id):
+    field = context.driver.find_element(By.ID, element_id)
+    field.clear()
+
+
 @when('I enter "{fill}" into the "{element_id}" field')
 def step_impl(context, fill, element_id):
     field = context.driver.find_element(By.ID, element_id)
