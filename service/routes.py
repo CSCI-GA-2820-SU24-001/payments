@@ -72,7 +72,7 @@ class FixedNumber(fields.Fixed):
 
 
 create_model = api.model(
-    "Promotion",
+    "Create_Promotion",
     {
         "promotion_name": fields.String(
             required=True, description="The name of the Promotion"
@@ -115,7 +115,7 @@ create_model = api.model(
 )
 
 update_model = api.model(
-    "Promotion",
+    "Update_Promotion",
     {
         "promotion_name": fields.String(
             required=False, description="The name of the Promotion"
@@ -158,7 +158,7 @@ update_model = api.model(
 )
 
 promotion_model = api.inherit(
-    "Promotion",
+    "PromotionModel",
     create_model,
     {
         "promotion_id": fields.Integer(
@@ -206,7 +206,9 @@ class PromotionResource(Resource):
     @api.marshal_with(promotion_model)
     @api.expect(update_model)
     def put(self, promotion_id):
-        """Updates a Promotion with promotion_id with the fields included in the body of the request"""
+        """
+        Updates a promotion with the specified promotion_id
+        Returns the updated promotion after the update has been applied"""
         app.logger.info(f"Got request to update Promotion with id: {promotion_id}")
         promotion = Promotion.find(promotion_id)
         if not promotion:
@@ -225,6 +227,7 @@ class PromotionResource(Resource):
     def get(self, promotion_id):
         """
         Read details of specific promotion id
+        Returns promotion details of a single promotion with the specified promotion id
         """
         app.logger.info(
             "Request to Retrieve a promotion with promotion id [%s]", promotion_id
@@ -242,9 +245,10 @@ class PromotionResource(Resource):
     @api.response(204, "Promotion deleted")
     @api.response(404, "Promotion not found")
     def delete(self, promotion_id):
-        """Deletes a Promotion with promotion_id with the fields included in the body of the request"""
+        """
+        Deletes a Promotion with promotion_id
+        """
         app.logger.info(f"Got request to delete Promotion with id: {promotion_id}")
-
         promotion = Promotion.find(promotion_id)
         if promotion:
             promotion.delete()
@@ -255,14 +259,18 @@ class PromotionResource(Resource):
 
 @api.route("/promotions", strict_slashes=False)
 class PromotionCollection(Resource):
-    """Handles all interactions with collections of Promotions"""
+    """Handles all interactions with collections of Promotions
+    GET /promotions - Retrieves a list of all promotions with query params
+    POST /promotions - Creates a new Promotion
+    """
 
     @api.doc("query_promotions")
     @api.expect(promotion_args, validate=True)
     @api.marshal_list_with(promotion_model)
     def get(self):
         """
-        Read details of all promotions matching search criteria
+        Search promotions by query parameters
+        Returns a list of all promotions matching search criteria
         """
         app.logger.info("Request to Retrieve all promotions with filters: {filters}")
         filters = promotion_args.parse_args()
@@ -280,8 +288,8 @@ class PromotionCollection(Resource):
     @api.marshal_with(promotion_model, code=201)
     def post(self):
         """
-        Creates a new Promotion
-        This endpoint will create a Promotion based on the data in the body that is posted
+        Creates a new Promotion based on the provided data
+        Returns the details of the created promotion along with the url for the created promotion
         """
         app.logger.info("Request to create a Promotion")
         data = request.get_json()
