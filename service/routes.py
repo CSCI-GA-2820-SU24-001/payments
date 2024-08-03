@@ -21,12 +21,12 @@ This service implements a REST API that allows you to Create, Read, Update
 and Delete Pets from the inventory of pets in the PetShop
 """
 
-from flask import request, abort, jsonify, url_for
+from flask import request, abort, jsonify
 from flask import current_app as app  # Import Flask application
 from flask_restx import Resource, fields, reqparse
 from service.models import Promotion, PromotionType, PromotionScope
 from service.common import status  # HTTP Status Codes
-from . import api
+from . import api  # pylint: disable=cyclic-import
 
 ######################################################################
 # GET INDEX
@@ -45,8 +45,12 @@ def index():
 
 @api.route("/health")
 class HealthResource(Resource):
+    """ Healthcheck endpoints
+    GET /health - Returns status of the service
+    """
+
     def get(self):
-        """Let them know our heart is still beating"""
+        """ Let them know our heart is still beating """
         return jsonify(status=200, message="Healthy")
 
 
@@ -61,11 +65,10 @@ class NullableString(fields.String):
 
 
 class FixedNumber(fields.Fixed):
-    def fixed_format(self, value):
-        return super().format(value)
-    
+    """ Input class which expects a fixed precision float """
     def format(self, value):
-        return float(self.fixed_format(value))
+        """ Format to a fixed precision float """
+        return float(super().format(value))
 
 
 create_model = api.model(
@@ -296,7 +299,7 @@ class PromotionCollection(Resource):
 @api.param("promotion_id", "The Promotion identifier")
 class ActivateResource(Resource):
     """Activate actions on a promotion
-    
+
     PUT /promotions/activate/{promotion_id} - Activate a Promotion with the promotion_id
     """
     @api.doc("activate_promotion")
