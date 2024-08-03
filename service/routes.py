@@ -60,6 +60,14 @@ class NullableString(fields.String):
     __schema_example__ = "nullable string"
 
 
+class FixedNumber(fields.Fixed):
+    def fixed_format(self, value):
+        return super().format(value)
+    
+    def format(self, value):
+        return float(self.fixed_format(value))
+
+
 create_model = api.model(
     "Promotion",
     {
@@ -85,7 +93,7 @@ create_model = api.model(
         "end_date": fields.DateTime(
             required=True, description="The end date of the Promotion"
         ),
-        "promotion_value": fields.Fixed(
+        "promotion_value": FixedNumber(
             decimals=2,
             required=True,
             description="The value of Promotion (Takes different values depending on the type)",
@@ -128,7 +136,7 @@ update_model = api.model(
         "end_date": fields.DateTime(
             required=False, description="The end date of the Promotion"
         ),
-        "promotion_value": fields.Fixed(
+        "promotion_value": FixedNumber(
             decimals=2,
             required=False,
             description="The value of Promotion (Takes different values depending on the type)",
@@ -159,10 +167,10 @@ promotion_model = api.inherit(
         "created_when": fields.DateTime(
             required=False, description="When the Promotion was created"
         ),
-        "updated_by": fields.String(
+        "modified_by": fields.String(
             required=False, description="The most recent user who updated the Promotion"
         ),
-        "updated_when": fields.DateTime(
+        "modified_when": fields.DateTime(
             required=False, description="When the Promotion was last updated"
         ),
     },
@@ -177,47 +185,6 @@ promotion_args.add_argument("promotion_type", type=str, required=False, help="Th
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
-@api.route("/promotions", strict_slashes=False)
-class PromotionCollection(Resource):
-    """ Handles all interactions with collections of Promotions """
-
-    @api.doc("query_promotions")
-    @api.expect(promotion_args, validate=True)
-    @api.marshal_list_with(promotion_model)
-    def get(self):
-        """
-        Read details of all promotions matching search criteria
-        """
-        app.logger.info("Request to Retrieve all promotions with filters: {filters}")
-        filters = promotion_args.parse_args()
-        to_list_query("promotion_scope", filters)
-        to_list_query("promotion_type", filters)
-
-        promotions = Promotion.find_with_filters(filters).all()
-        return (
-            [promotion.serialize() for promotion in promotions],
-            status.HTTP_200_OK,
-        )
-
-    @api.doc("create_promotion")
-    @api.response(400, "The posted data was not valid")
-    @api.expect(create_model, validate=True)
-    @api.marshal_with(promotion_model, code=201)
-    def post(self):
-        """
-        Creates a new Promotion
-        This endpoint will create a Promotion based on the data in the body that is posted
-        """
-        app.logger.info("Request to create a Promotion")
-        data = request.get_json()
-        promotion = Promotion()
-        promotion.deserialize(data)
-        promotion.create()
-        message = promotion.serialize()
-        location_url = url_for("read", promotion_id=promotion.promotion_id, _external=True)
-        return message, status.HTTP_201_CREATED, {"Location": location_url}
-
-
 @api.route("/promotions/<promotion_id>", strict_slashes=False)
 @api.param("promotion_id", "The Promotion identifier")
 class PromotionResource(Resource):
@@ -281,6 +248,48 @@ class PromotionResource(Resource):
 
         app.logger.info(f"Promotion with id {promotion_id} delete complete.")
         return {}, status.HTTP_204_NO_CONTENT
+
+
+@api.route("/promotions", strict_slashes=False)
+class PromotionCollection(Resource):
+    """Handles all interactions with collections of Promotions"""
+
+    @api.doc("query_promotions")
+    @api.expect(promotion_args, validate=True)
+    @api.marshal_list_with(promotion_model)
+    def get(self):
+        """
+        Read details of all promotions matching search criteria
+        """
+        app.logger.info("Request to Retrieve all promotions with filters: {filters}")
+        filters = promotion_args.parse_args()
+        to_list_query("promotion_scope", filters)
+        to_list_query("promotion_type", filters)
+        promotions = Promotion.find_with_filters(filters).all()
+        return (
+            [promotion.serialize() for promotion in promotions],
+            status.HTTP_200_OK,
+        )
+
+    @api.doc("create_promotion")
+    @api.response(400, "The posted data was not valid")
+    @api.expect(create_model, validate=True)
+    @api.marshal_with(promotion_model, code=201)
+    def post(self):
+        """
+        Creates a new Promotion
+        This endpoint will create a Promotion based on the data in the body that is posted
+        """
+        app.logger.info("Request to create a Promotion")
+        data = request.get_json()
+        promotion = Promotion()
+        promotion.deserialize(data)
+        promotion.create()
+        message = promotion.serialize()
+        location_url = api.url_for(
+            PromotionResource, promotion_id=promotion.promotion_id, _external=True
+        )
+        return message, status.HTTP_201_CREATED, {"Location": location_url}
 
 
 @api.route("/promotions/activate/<promotion_id>")
@@ -355,5 +364,5 @@ def to_list_query(key, data):
         key (str): the key to be converted
         data (dict): the dict to convert it in
     """
-    if key in data:
+    if key in data and data[key] is not None:
         data[key] = str.split(data[key], ",")

@@ -62,6 +62,7 @@ class TestYourResourceService(TestCase):
             "/api/promotions", json=promotion.serialize(), content_type="application/json"
         )
         print(response.get_data())
+        print(response)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         new_promotion = response.get_json()
         self.assertEqual(new_promotion["promotion_name"], promotion.promotion_name)
@@ -132,7 +133,7 @@ class TestYourResourceService(TestCase):
 
     def test_health(self):
         """It should be healthy"""
-        response = self.client.get("/health")
+        response = self.client.get("/api/health")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(data["status"], 200)
@@ -343,6 +344,7 @@ class TestYourResourceService(TestCase):
         promotion_1.create()
         promotion_2.create()
         response = self.client.get("/api/promotions")
+        print(response.get_data())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), 2)
