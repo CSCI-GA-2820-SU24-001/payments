@@ -59,7 +59,7 @@ class TestYourResourceService(TestCase):
         promotion = PromotionFactory()
         print(promotion.serialize())
         response = self.client.post(
-            "/promotions", json=promotion.serialize(), content_type="application/json"
+            "/api/promotions", json=promotion.serialize(), content_type="application/json"
         )
         print(response.get_data())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -74,7 +74,7 @@ class TestYourResourceService(TestCase):
     def test_create_promotion_missing_data(self):
         """Test creating a Promotion with missing data"""
         response = self.client.post(
-            "/promotions", json={}, content_type="application/json"
+            "/api/promotions", json={}, content_type="application/json"
         )
         print(response.get_data())
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -83,7 +83,7 @@ class TestYourResourceService(TestCase):
         """Test creating a Promotion with an invalid content type"""
         promotion = PromotionFactory()
         response = self.client.post(
-            "/promotions", json=promotion.serialize(), content_type="text/plain"
+            "/api/promotions", json=promotion.serialize(), content_type="text/plain"
         )
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
@@ -93,7 +93,7 @@ class TestYourResourceService(TestCase):
         new_promotion = promotion.serialize()
         new_promotion["modified_when"] = "testInvalid"
         response = self.client.post(
-            "/promotions", json=new_promotion, content_type="application/json"
+            "/api/promotions", json=new_promotion, content_type="application/json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -113,7 +113,7 @@ class TestYourResourceService(TestCase):
             Promotion.create = mock_create_with_exception
 
             response = self.client.post(
-                "/promotions",
+                "/api/promotions",
                 json=promotion.serialize(),
                 content_type="application/json",
             )
@@ -149,7 +149,7 @@ class TestYourResourceService(TestCase):
             "promotion_scope": "ENTIRE_STORE",
         }
         resp = self.client.put(
-            f"/promotions/{existing_promotion.promotion_id}",
+            f"/api/promotions/{existing_promotion.promotion_id}",
             json=new_promotion_data,
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -182,7 +182,7 @@ class TestYourResourceService(TestCase):
         existing_promotion.create()
 
         resp = self.client.put(
-            f"/promotions/{existing_promotion.promotion_id}",
+            f"/api/promotions/{existing_promotion.promotion_id}",
             data="12345",
         )
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
@@ -197,7 +197,7 @@ class TestYourResourceService(TestCase):
             "start_date": "2025-03-03",
             "promotion_scope": "ENTIRE_STORE",
         }
-        resp = self.client.put(f"/promotions/{184182325}", json=new_promotion_data)
+        resp = self.client.put(f"/api/promotions/{184182325}", json=new_promotion_data)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         db.session.expire_all()
         updated_promotion = Promotion.find(existing_promotion.promotion_id)
@@ -214,7 +214,7 @@ class TestYourResourceService(TestCase):
             "promotion_scope": "ENTIRE_STORE",
         }
         resp = self.client.put(
-            f"/promotions/{existing_promotion.promotion_id}",
+            f"/api/promotions/{existing_promotion.promotion_id}",
             json=new_promotion_data,
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
@@ -242,7 +242,7 @@ class TestYourResourceService(TestCase):
 
             existing_promotion.update = mock_update_with_exception
             resp = self.client.put(
-                f"/promotions/{existing_promotion.promotion_id}",
+                f"/api/promotions/{existing_promotion.promotion_id}",
                 json=new_promotion_data,
             )
             self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -259,7 +259,7 @@ class TestYourResourceService(TestCase):
         existing_promotion = PromotionFactory()
         existing_promotion.create()
         response = self.client.get(
-            f"/promotions/{existing_promotion.promotion_id}",
+            f"/api/promotions/{existing_promotion.promotion_id}",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
@@ -293,7 +293,7 @@ class TestYourResourceService(TestCase):
         existing_promotion = PromotionFactory()
         existing_promotion.create()
         response = self.client.get(
-            "/promotions/1234567",
+            "/api/promotions/1234567",
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -302,7 +302,7 @@ class TestYourResourceService(TestCase):
         existing_promotion = PromotionFactory()
         existing_promotion.create()
 
-        resp = self.client.delete(f"/promotions/{existing_promotion.promotion_id}")
+        resp = self.client.delete(f"/api/promotions/{existing_promotion.promotion_id}")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         db.session.expire_all()
         self.assertIsNone(Promotion.find(existing_promotion.promotion_id))
@@ -312,7 +312,7 @@ class TestYourResourceService(TestCase):
         existing_promotion = PromotionFactory()
         existing_promotion.create()
 
-        resp = self.client.delete(f"/promotions/{184182325}")
+        resp = self.client.delete(f"/api/promotions/{184182325}")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         db.session.expire_all()
 
@@ -328,7 +328,7 @@ class TestYourResourceService(TestCase):
                 raise ConnectionError
 
             existing_promotion.delete = mock_delete_with_exception
-            resp = self.client.delete(f"/promotions/{existing_promotion.promotion_id}")
+            resp = self.client.delete(f"/api/promotions/{existing_promotion.promotion_id}")
             self.assertEqual(resp.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
             db.session.expire_all()
             saved_promotion = Promotion.find(existing_promotion.promotion_id)
@@ -342,7 +342,7 @@ class TestYourResourceService(TestCase):
         promotion_2 = PromotionFactory()
         promotion_1.create()
         promotion_2.create()
-        response = self.client.get("/promotions")
+        response = self.client.get("/api/promotions")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), 2)
@@ -373,7 +373,7 @@ class TestYourResourceService(TestCase):
         promotion4.promotion_scope = PromotionScope.PRODUCT_ID
         promotion4.create()
         response = self.client.get(
-            "/promotions?promotion_scope=product_id,entire_store&datetime=2025-06-01"
+            "/api/promotions?promotion_scope=product_id,entire_store&datetime=2025-06-01"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
@@ -381,7 +381,7 @@ class TestYourResourceService(TestCase):
 
     def test_list_all_promotions_with_bad_query(self):
         """It should return a 400 Bad Request response"""
-        response = self.client.get("/promotions?datetime=2025-06-900")
+        response = self.client.get("/api/promotions?datetime=2025-06-900")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_list_all_promotions_with_wrong_method(self):
@@ -390,7 +390,7 @@ class TestYourResourceService(TestCase):
         promotion_2 = PromotionFactory()
         promotion_1.create()
         promotion_2.create()
-        response = self.client.put("/promotions")
+        response = self.client.put("/api/promotions")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_list_all_promotions_with_connection_error(self):
@@ -407,7 +407,7 @@ class TestYourResourceService(TestCase):
                 raise ConnectionError
 
             Promotion.find_with_filters = mock_all
-            response = self.client.get("/promotions")
+            response = self.client.get("/api/promotions")
             self.assertEqual(
                 response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -418,7 +418,7 @@ class TestYourResourceService(TestCase):
         """It should not activate any promotions and return a 404 not found when an invalid_promotion_id is supplied"""
         existing_promotion = PromotionFactory()
         existing_promotion.create()
-        resp = self.client.put(f"/promotions/activate/{1234567}")
+        resp = self.client.put(f"/api/promotions/activate/{1234567}")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         db.session.expire_all()
         activated_promotion = Promotion.find(existing_promotion.promotion_id)
@@ -428,7 +428,7 @@ class TestYourResourceService(TestCase):
         """It should switch the activate column of promotions with valid_promotion_id to True"""
         existing_promotion = PromotionFactory()
         existing_promotion.create()
-        resp = self.client.put(f"/promotions/activate/{existing_promotion.promotion_id}")
+        resp = self.client.put(f"/api/promotions/activate/{existing_promotion.promotion_id}")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         db.session.expire_all()
         activated_promotion = Promotion.find(existing_promotion.promotion_id)
@@ -438,7 +438,7 @@ class TestYourResourceService(TestCase):
         """It should not deactivate any promotions and return a 404 not found when an invalid_promotion_id is supplied"""
         existing_promotion = PromotionFactory()
         existing_promotion.create()
-        resp = self.client.put(f"/promotions/deactivate/{1234567}")
+        resp = self.client.put(f"/api/promotions/deactivate/{1234567}")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         db.session.expire_all()
         deactivated_promotion = Promotion.find(existing_promotion.promotion_id)
@@ -448,7 +448,7 @@ class TestYourResourceService(TestCase):
         """It should switch the deactivate column of promotions with valid_promotion_id to False"""
         existing_promotion = PromotionFactory()
         existing_promotion.create()
-        resp = self.client.put(f"/promotions/deactivate/{existing_promotion.promotion_id}")
+        resp = self.client.put(f"/api/promotions/deactivate/{existing_promotion.promotion_id}")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         db.session.expire_all()
         deactivated_promotion = Promotion.find(existing_promotion.promotion_id)
