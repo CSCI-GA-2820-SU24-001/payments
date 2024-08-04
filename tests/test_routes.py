@@ -309,7 +309,7 @@ class TestYourResourceService(TestCase):
         self.assertIsNone(Promotion.find(existing_promotion.promotion_id))
 
     def test_delete_with_invalid_promotion_id(self):
-        """It should not delete any model and return a 404 not found when an invalid_promotion_id is supplied"""
+        """It should return a 204 No Content when an invalid_promotion_id is supplied"""
         existing_promotion = PromotionFactory()
         existing_promotion.create()
 
