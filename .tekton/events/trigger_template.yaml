@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
-  name: promotion-template
+  name: cd-template
 spec:
   params:
   - name: git-repo-url
@@ -15,11 +15,11 @@ spec:
   - apiVersion: tekton.dev/v1beta1
     kind: PipelineRun
     metadata:
-      generateName: promotion-pipeline-$(tt.params.git-repo-name)-
+      generateName: cd-pipeline-$(tt.params.git-repo-name)-
     spec:
       serviceAccountName: pipeline
       pipelineRef:
-        name: promotion-pipeline
+        name: cd-pipeline
       params:
       - name: APP_NAME
         value: $(tt.params.git-repo-name)
@@ -28,6 +28,6 @@ spec:
       - name: IMAGE_NAME
         value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(tt.params.git-repo-name):$(tt.params.git-revision)
       workspaces:
-      - name: promotion-workspace
+      - name: pipeline-workspace
         persistentVolumeClaim:
-          claimName: promotion-pvc
+          claimName: pipeline-pvc

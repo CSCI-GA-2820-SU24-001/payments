@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
-  name: promotion-binding
+  name: cd-binding
 spec:
   params:
   - name: git-repo-url
