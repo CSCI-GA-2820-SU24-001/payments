@@ -1,0 +1,10 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: promotion-trigger
+spec:
+  serviceAccountName: pipeline
+  bindings:
+    - ref: promotion-binding
+  template:
+    ref: promotion-template
