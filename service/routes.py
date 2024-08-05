@@ -243,7 +243,6 @@ class PromotionResource(Resource):
 
     @api.doc("delete_promotion")
     @api.response(204, "Promotion deleted")
-    @api.response(404, "Promotion not found")
     def delete(self, promotion_id):
         """
         Deletes a Promotion with promotion_id
