@@ -62,7 +62,7 @@ $(function () {
             "promotion_name": name,
             "promotion_type": type,
             "promotion_code": code,
-            "promotion_value": value,
+            "promotion_value": Number(value),
             "promotion_description": description,
             "active": active,
             "promotion_scope": scope,
@@ -75,7 +75,7 @@ $(function () {
         
         let ajax = $.ajax({
             type: "POST",
-            url: "/promotions",
+            url: "/api/promotions",
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -84,8 +84,6 @@ $(function () {
             update_form_data(res)
             flash_message("Success")
         });
-
-        
 
         ajax.fail(function(res){
             flash_message(res.responseJSON.message)
@@ -114,7 +112,7 @@ $(function () {
             "promotion_name": name,
             "promotion_type": type,
             "promotion_code": code,
-            "promotion_value": value,
+            "promotion_value": Number(value),
             "promotion_description": description,
             "active": active,
             "promotion_scope": scope,
@@ -126,7 +124,7 @@ $(function () {
 
         let ajax = $.ajax({
                 type: "PUT",
-                url: `/promotions/${promotion_id}`,
+                url: `/api/promotions/${promotion_id}`,
                 contentType: "application/json",
                 data: JSON.stringify(data)
             })
@@ -154,7 +152,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/promotions/${promotion_id}`,
+            url: `/api/promotions/${promotion_id}`,
             contentType: "application/json",
             data: ''
         })
@@ -184,7 +182,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/promotions/${promotion_id}`,
+            url: `/api/promotions/${promotion_id}`,
             contentType: "application/json",
             data: '',
         })
@@ -239,13 +237,11 @@ $(function () {
             }
         }
 
-        console.log(queryString)
-
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/promotions?${queryString}`,
+            url: `/api/promotions?${queryString}`,
             contentType: "application/json",
             data: ''
         })

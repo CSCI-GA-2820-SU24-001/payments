@@ -20,18 +20,37 @@ and SQL database
 """
 import sys
 from flask import Flask
+from flask_restx import Api
 from service import config
 from service.common import log_handlers
 
 
+api = None  # pylint: disable=invalid-name
 ############################################################
 # Initialize the Flask instance
 ############################################################
+
+
 def create_app():
     """Initialize the core application."""
     # Create Flask application
     app = Flask(__name__)
     app.config.from_object(config)
+    app.url_map.strict_slashes = False
+
+    # Configure Swagger
+
+    global api
+    api = Api(
+        app,
+        version="1.0.0",
+        title="Promotion REST API Service",
+        description="This is the Promotion REST API service",
+        default="promotions",
+        default_label="Promotion operations",
+        doc="/apidocs",
+        prefix="/api"
+    )
 
     # Initialize Plugins
     # pylint: disable=import-outside-toplevel

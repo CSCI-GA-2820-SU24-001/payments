@@ -71,9 +71,8 @@ class Promotions(TestCase):
         assert serialized["end_date"] == datetime_to_str(test_promotion.end_date)
         assert serialized["promotion_value"] == test_promotion.promotion_value
         assert serialized["promotion_code"] == test_promotion.promotion_code
-        assert serialized["created_by"] == test_promotion.created_by
-        assert serialized["modified_by"] == test_promotion.modified_by
-
+        assert serialized["created_by"] == str(test_promotion.created_by)
+        assert serialized["modified_by"] == str(test_promotion.modified_by)
         assert serialized["modified_when"] is None
         assert serialized["active"] == test_promotion.active
 
@@ -89,8 +88,8 @@ class Promotions(TestCase):
         assert serialized["end_date"] == datetime_to_str(test_promotion.end_date)
         assert serialized["promotion_value"] == test_promotion.promotion_value
         assert serialized["promotion_code"] == test_promotion.promotion_code
-        assert serialized["created_by"] == test_promotion.created_by
-        assert serialized["modified_by"] == test_promotion.modified_by
+        assert serialized["created_by"] == str(test_promotion.created_by)
+        assert serialized["modified_by"] == str(test_promotion.modified_by)
         assert serialized["modified_when"] is None
         assert serialized["active"] == test_promotion.active
 

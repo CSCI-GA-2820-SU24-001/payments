@@ -55,7 +55,7 @@ def step_impl(context):
 @given("the following promotions")
 def step_impl(context):
     # Get a list all of the promotions
-    rest_endpoint = f"{context.base_url}/promotions"
+    rest_endpoint = f"{context.base_url}/api/promotions"
     context.resp = requests.get(rest_endpoint, timeout=10)
     expect(context.resp.status_code).equal_to(200)
     # and delete them one by one
