@@ -134,8 +134,8 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             "end_date": datetime_to_str(self.end_date),
             "promotion_value": self.promotion_value,
             "promotion_code": self.promotion_code,
-            "created_by": self.created_by,
-            "modified_by": self.modified_by,
+            "created_by": str(self.created_by),
+            "modified_by": str(self.modified_by),
             "created_when": (
                 datetime_to_str(self.created_when) if self.created_when else None
             ),
