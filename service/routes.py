@@ -43,10 +43,15 @@ def index():
 ######################################################################
 
 
-@app.route("/health")
-def health_check():
-    """Let them know our heart is still beating"""
-    return jsonify(status=200, message="Healthy"), status.HTTP_200_OK
+@api.route("/health")
+class HealthResource(Resource):
+    """ Healthcheck endpoints
+    GET /health - Returns status of the service
+    """
+
+    def get(self):
+        """ Let them know our heart is still beating """
+        return jsonify(status=200, message="Healthy")
 
 
 ######################################################################
