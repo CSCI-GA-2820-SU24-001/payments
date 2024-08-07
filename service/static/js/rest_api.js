@@ -282,4 +282,58 @@ $(function () {
 
     });
 
+    // ****************************************
+    // Activate a Promotion
+    // ****************************************
+
+    $("#activate-btn").click(function () {
+
+        let promotion_id = $("#promotion_id").val();
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+                type: "PUT",
+                url: `/api/promotions/activate/${promotion_id}`,
+                contentType: "application/json",
+            })
+
+        ajax.done(function(res){
+            update_form_data(res)
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+    // ****************************************
+    // Deactivate a Promotion
+    // ****************************************
+
+    $("#deactivate-btn").click(function () {
+
+        let promotion_id = $("#promotion_id").val();
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+                type: "PUT",
+                url: `/api/promotions/deactivate/${promotion_id}`,
+                contentType: "application/json",
+            })
+
+        ajax.done(function(res){
+            update_form_data(res)
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
 })
