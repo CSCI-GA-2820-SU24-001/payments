@@ -43,7 +43,7 @@ def index():
 ######################################################################
 
 
-@api.route("/health")
+@api.route("/api/health")
 class HealthResource(Resource):
     """ Healthcheck endpoints
     GET /health - Returns status of the service
