@@ -160,6 +160,9 @@ def step_impl(context):
     )
     expect_field_value(context, "start_date", str(expected_promotion["start_date"]))
     expect_field_value(context, "end_date", str(expected_promotion["end_date"]))
+    expect_field_value(
+        context, "promotion_available", str(expected_promotion["active"]).lower()
+    )
     assert True
 
 
