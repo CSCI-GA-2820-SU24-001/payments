@@ -84,3 +84,12 @@ Scenario: Deactivating a Promotion
     Then I should see the promotion details in the form
     | ID | Name        | Value | Code  | Description   | Type     | Active | Scope        | Start Date | End Date   | Created By                           | Modified By                          | Created When | Modified When |
     | 1 | Promotion A | 10 | CODE1 | Description 1 | ABSOLUTE | False | ENTIRE_STORE | 2024-01-01 | 2024-12-31 | 00000000-0000-0000-0000-000000000000 | 00000000-0000-0000-0000-000000000000 | 2024-01-01 | 2024-01-06 |
+
+Scenario: Deleting a Promotion
+    When I visit the "Home Page"
+    And I look for test promotion id "2"
+    And I click the "retrieve-btn" button
+    And I click the "delete-btn" button
+    And I click the "search-btn" button
+    Then I should see names "Promotion A, Promotion C" in the search result table
+    And I should not see names "Promotion B" in the search result table
