@@ -31,12 +31,6 @@ def request_validation_error(error):
     return bad_request(error)
 
 
-'''@api.errorhandler(Exception)
-def request_generic_error(error):
-    """Handles Value Errors from bad data"""
-    return internal_server_error(error)'''
-
-
 def bad_request(error):
     """Handles bad requests with 400_BAD_REQUEST"""
     message = str(error)
@@ -48,18 +42,4 @@ def bad_request(error):
             "message": message,
         },
         status.HTTP_400_BAD_REQUEST,
-    )
-
-
-def internal_server_error(error):
-    """Handles unexpected server error with 500_SERVER_ERROR"""
-    message = str(error)
-    app.logger.error(message)
-    return (
-        {
-            "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
-            "error": "Internal Server Error",
-            "message": message,
-        },
-        status.HTTP_500_INTERNAL_SERVER_ERROR,
     )
