@@ -38,6 +38,7 @@ def index():
     """Root URL response"""
     return app.send_static_file("index.html")
 
+
 ######################################################################
 # GET HEALTH CHECK
 ######################################################################
@@ -45,12 +46,12 @@ def index():
 
 @api.route("/health")
 class HealthResource(Resource):
-    """ Healthcheck endpoints
+    """Healthcheck endpoints
     GET /health - Returns status of the service
     """
 
     def get(self):
-        """ Let them know our heart is still beating """
+        """Let them know our heart is still beating"""
         return jsonify(status=200, message="Healthy")
 
 
@@ -58,16 +59,19 @@ class HealthResource(Resource):
 # M O D E L S
 ######################################################################
 
+
 class NullableString(fields.String):
-    """ Input class which expects a string or null value """
+    """Input class which expects a string or null value"""
+
     __schema_type__ = ["string", "null"]
     __schema_example__ = "nullable string"
 
 
 class FixedNumber(fields.Fixed):
-    """ Input class which expects a fixed precision float """
+    """Input class which expects a fixed precision float"""
+
     def format(self, value):
-        """ Format to a fixed precision float """
+        """Format to a fixed precision float"""
         return float(super().format(value))
 
 
@@ -180,15 +184,27 @@ promotion_model = api.inherit(
 )
 
 promotion_args = reqparse.RequestParser()
-promotion_args.add_argument("datetime", type=str, required=False, help="The datetime of the promotion in ISO format")
-promotion_args.add_argument("promotion_scope", type=str, required=False, help="The scopes of promotions requested")
-promotion_args.add_argument("promotion_type", type=str, required=False, help="The types of promotions requested")
+promotion_args.add_argument(
+    "datetime",
+    type=str,
+    required=False,
+    help="The datetime of the promotion in ISO format",
+)
+promotion_args.add_argument(
+    "promotion_scope",
+    type=str,
+    required=False,
+    help="The scopes of promotions requested",
+)
+promotion_args.add_argument(
+    "promotion_type", type=str, required=False, help="The types of promotions requested"
+)
 
 
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
-@api.route("/promotions/<promotion_id>", strict_slashes=False)
+@api.route("/promotions/<int:promotion_id>", strict_slashes=False)
 @api.param("promotion_id", "The Promotion identifier")
 class PromotionResource(Resource):
     """
@@ -214,7 +230,8 @@ class PromotionResource(Resource):
         if not promotion:
 
             abort_with_error(
-                status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+                status.HTTP_404_NOT_FOUND,
+                f"Promotion with id: {promotion_id} not found",
             )
         request_json = request.get_json()
         promotion = promotion.deserialize(request_json)
@@ -302,13 +319,14 @@ class PromotionCollection(Resource):
         return message, status.HTTP_201_CREATED, {"Location": location_url}
 
 
-@api.route("/promotions/activate/<promotion_id>")
 @api.param("promotion_id", "The Promotion identifier")
+@api.route("/promotions/activate/<int:promotion_id>")
 class ActivateResource(Resource):
     """Activate actions on a promotion
 
     PUT /promotions/activate/{promotion_id} - Activate a Promotion with the promotion_id
     """
+
     @api.doc("activate_promotion")
     @api.response(404, "Promotion not found")
     @api.response(200, "Promotion Activated")
@@ -319,7 +337,8 @@ class ActivateResource(Resource):
         promotion = Promotion.find(promotion_id)
         if not promotion:
             abort_with_error(
-                status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+                status.HTTP_404_NOT_FOUND,
+                f"Promotion with id: {promotion_id} not found",
             )
         promotion.active = True
         promotion.update()
@@ -333,6 +352,7 @@ class DeactivateResource(Resource):
 
     PUT /promotions/deactivate/{promotion_id} - Deactivate a Promotion with the promotion_id
     """
+
     @api.doc("activate_promotion")
     @api.response(404, "Promotion not found")
     @api.response(200, "Promotion Deactivated")
@@ -343,7 +363,8 @@ class DeactivateResource(Resource):
         promotion = Promotion.find(promotion_id)
         if not promotion:
             abort_with_error(
-                status.HTTP_404_NOT_FOUND, f"Promotion with id: {promotion_id} not found"
+                status.HTTP_404_NOT_FOUND,
+                f"Promotion with id: {promotion_id} not found",
             )
         promotion.active = False
         promotion.update()

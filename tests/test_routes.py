@@ -208,6 +208,22 @@ class TestYourResourceService(TestCase):
         updated_promotion = Promotion.find(existing_promotion.promotion_id)
         assert updated_promotion.promotion_name != "New Promotion Name"
 
+    def test_update_with_malformed_promotion_id(self):
+        """It should not update any model and return a 404 not found when an malformed promotion_id is supplied"""
+        existing_promotion = PromotionFactory()
+        existing_promotion.create()
+
+        new_promotion_data = {
+            "promotion_name": "New Promotion Name",
+            "start_date": "2025-03-03",
+            "promotion_scope": "ENTIRE_STORE",
+        }
+        resp = self.client.put("/api/promotions/abcde", json=new_promotion_data)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        db.session.expire_all()
+        updated_promotion = Promotion.find(existing_promotion.promotion_id)
+        assert updated_promotion.promotion_name != "New Promotion Name"
+
     def test_update_with_invalid_data(self):
         """It should not update model and return a 400 not found when invalid data is supplied"""
         existing_promotion = PromotionFactory()
