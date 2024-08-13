@@ -36,6 +36,15 @@ $(function () {
         $("#end_date").val("");
     }
 
+    // Validates the Promotion ID field to check it is an integer
+    function validate_id_field() {
+        let promotion_id = $("#promotion_id").val();
+        //Check if promotion_id is an integer
+        return !isNaN(promotion_id) &&
+            parseInt(Number(promotion_id)) == promotion_id &&
+            !isNaN(parseInt(promotion_id, 10));
+    }
+
     // Updates the flash message area
     function flash_message(message) {
         $("#flash_message").empty();
@@ -96,7 +105,10 @@ $(function () {
     // ****************************************
 
     $("#update-btn").click(function () {
-
+        if (!validate_id_field()) {
+            flash_message("Please provide a valid Promotion ID")
+            return
+        }
         let promotion_id = $("#promotion_id").val();
         let name = $("#promotion_name").val();
         let type = $("#promotion_type").val();
@@ -145,7 +157,10 @@ $(function () {
     // ****************************************
 
     $("#retrieve-btn").click(function () {
-
+        if (!validate_id_field()) {
+            flash_message("Please provide a valid Promotion ID")
+            return
+        }
         let promotion_id = $("#promotion_id").val();
 
         $("#flash_message").empty();
@@ -175,7 +190,10 @@ $(function () {
     // ****************************************
 
     $("#delete-btn").click(function () {
-
+        if (!validate_id_field()) {
+            flash_message("Please provide a valid Promotion ID")
+            return
+        }
         let promotion_id = $("#promotion_id").val();
 
         $("#flash_message").empty();
@@ -287,7 +305,10 @@ $(function () {
     // ****************************************
 
     $("#activate-btn").click(function () {
-
+        if (!validate_id_field()) {
+            flash_message("Please provide a valid Promotion ID")
+            return
+        }
         let promotion_id = $("#promotion_id").val();
 
         $("#flash_message").empty();
@@ -314,7 +335,10 @@ $(function () {
     // ****************************************
 
     $("#deactivate-btn").click(function () {
-
+        if (!validate_id_field()) {
+            flash_message("Please provide a valid Promotion ID")
+            return
+        }
         let promotion_id = $("#promotion_id").val();
 
         $("#flash_message").empty();
