@@ -36,7 +36,7 @@ $(function () {
         $("#end_date").val("");
     }
 
-    // Validates the Promotion ID field
+    // Validates the Promotion ID field to check it's an integer
     function validate_id_field() {
         let promotion_id = $("#promotion_id").val();
         //Check if promotion_id is an integer
