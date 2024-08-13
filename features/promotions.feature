@@ -93,3 +93,8 @@ Scenario: Deleting a Promotion
     And I click the "search-btn" button
     Then I should see names "Promotion A, Promotion C" in the search result table
     And I should not see names "Promotion B" in the search result table
+
+Scenario: Deleting a Promotion without filling the promotion_id
+    When I visit the "Home Page"
+    And I click the "delete-btn" button
+    Then I should see "Please provide a valid Promotion ID" after a while
