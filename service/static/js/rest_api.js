@@ -35,6 +35,7 @@ $(function () {
         $("#start_date").val("");
         $("#end_date").val("");
     }
+    
 
     // Updates the flash message area
     function flash_message(message) {
