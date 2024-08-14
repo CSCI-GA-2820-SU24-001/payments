@@ -1,5 +1,5 @@
 """
-TestYourResourceModel API Service Test Suite
+TestPromotion API Service Test Suite
 """
 
 import os

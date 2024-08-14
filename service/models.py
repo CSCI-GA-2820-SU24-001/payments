@@ -1,5 +1,5 @@
 """
-Models for YourResourceModel
+Models for Promotion
 
 All of the models are stored in this module
 """
@@ -61,7 +61,7 @@ class PromotionScope(enum.Enum):
 
 class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
     """
-    Class that represents a YourResourceModel
+    Class that represents a Promotion
     """
 
     ##################################################
@@ -79,7 +79,9 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
     created_by = db.Column(db.Uuid, nullable=False)
     modified_by = db.Column(db.Uuid, nullable=True)
     created_when = db.Column(db.DateTime, nullable=False, default=dt.utcnow)
-    modified_when = db.Column(db.DateTime, nullable=True, default=dt.utcnow, onupdate=dt.utcnow)
+    modified_when = db.Column(
+        db.DateTime, nullable=True, default=dt.utcnow, onupdate=dt.utcnow
+    )
     active = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
@@ -87,7 +89,7 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
 
     def create(self):
         """
-        Creates a YourResourceModel to the database
+        Creates a Promotion to the database
         """
         logger.info("Creating %s", self.promotion_name)
         self.promotion_id = None  # pylint: disable=invalid-name
@@ -101,7 +103,7 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
 
     def update(self):
         """
-        Updates a YourResourceModel to the database
+        Updates a Promotion to the database
         """
         logger.info("Saving %s", self.promotion_name)
         try:
@@ -112,7 +114,7 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             raise DataValidationError(e) from e
 
     def delete(self):
-        """Removes a YourResourceModel from the data store"""
+        """Removes a Promotion from the data store"""
         logger.info("Deleting %s", self.promotion_name)
         try:
             db.session.delete(self)
@@ -123,7 +125,7 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             raise DataValidationError(e) from e
 
     def serialize(self):
-        """Serializes a YourResourceModel into a dictionary"""
+        """Serializes a Promotion into a dictionary"""
         return {
             "promotion_id": self.promotion_id,
             "promotion_name": self.promotion_name,
@@ -223,7 +225,7 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
             raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except TypeError as error:
             raise DataValidationError(
-                "Invalid YourResourceModel: body of request contained bad or no data "
+                "Invalid Promotion: body of request contained bad or no data "
                 + str(error)
             ) from error
         return self
@@ -274,13 +276,13 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
 
     @classmethod
     def all(cls):
-        """Returns all of the YourResourceModels in the database"""
-        logger.info("Processing all YourResourceModels")
+        """Returns all of the Promotions in the database"""
+        logger.info("Processing all Promotions")
         return cls.query.all()
 
     @classmethod
     def find(cls, by_id):
-        """Finds a YourResourceModel by it's ID"""
+        """Finds a Promotion by it's ID"""
         logger.info("Processing lookup for id %s ...", by_id)
         return cls.query.session.get(cls, by_id)
 
@@ -350,7 +352,7 @@ class Promotion(db.Model):  # pylint: disable=too-many-instance-attributes
         return cls.query.filter(cls.promotion_name == name)
 
 
-@event.listens_for(Promotion, 'before_insert')
+@event.listens_for(Promotion, "before_insert")
 def before_insert(_, __, target):
     """Set the created_when and modified_when fields to current UTC time before insert"""
     now = dt.utcnow()
@@ -358,7 +360,7 @@ def before_insert(_, __, target):
     target.modified_when = now
 
 
-@event.listens_for(Promotion, 'before_update')
+@event.listens_for(Promotion, "before_update")
 def before_update(_, __, target):
     """Set the modified_when field to current UTC time before update"""
     now = dt.utcnow()
