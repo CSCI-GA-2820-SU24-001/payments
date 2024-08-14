@@ -59,15 +59,16 @@ cluster-rm: ## Remove a K3D Kubernetes cluster
 	k3d cluster delete
 
 .PHONY: deploy
-depoy: ## Deploy the service on local Kubernetes
+deploy: ## Deploy the service on local Kubernetes
 	$(info Deploying service locally...)
+	kubectl apply -f k8s/postgres
 	kubectl apply -f k8s/
 
 build-image: ## Build the Docker image
 	$(info Building Docker image...)
-	docker build -t customers:latest .
+	docker build -t promotion:latest .
 
 push-image: ## Push the Docker image to the registry
 	$(info Pushing Docker image to registry...)
-	docker tag customers:latest cluster-registry:5000/customers:latest
-	docker push cluster-registry:5000/customers:latest
+	docker tag promotions:latest cluster-registry:5000/promotion:latest
+	docker push cluster-registry:5000/promotion:latest
